@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String     @id @default(cuid())
+  login               String     @unique
+  passwordHash        String?
+  username            String?    @unique
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  accounts            Account[]                                  // “привязки к провайдерам”
+}
+
+model Account {
+  id                  String     @id @default(cuid())
+  provider            String                                    // Кто выдал аккаунт ("google", "github", "facebook")
+  providerAccountId   String                                    // ID пользователя у провайдера
+  userId              String                                    // внешний ключ (foreign key), ссылка на User.id
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])                       // @@unique защищает от дубликатов У одного провайдера один accountId может существовать только один раз
+  @@index([userId])                                             // @@index ускоряет работу
+}

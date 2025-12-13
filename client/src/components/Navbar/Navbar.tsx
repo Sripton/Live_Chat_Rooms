@@ -27,7 +27,7 @@ const COLORS = {
 export default function Navbar() {
   const [openMenu, setOpenMenu] = useState<boolean>(false); // явная типизация
 
-  const menuItems: string[] = ["Главная", "Мой профиль", "Выход", "Войти"];
+  const menuItems: string[] = ["Главная", "Мой профиль", "Войти", "Выход"];
 
   const getStartIcon = (menu: string) => {
     switch (menu) {
@@ -47,7 +47,10 @@ export default function Navbar() {
     <>
       <CssBaseline />
       {/* Верхняя панель навигации */}
-      <Container maxWidth={false} disableGutters>
+      <Container
+        maxWidth={false} // контейнер растягивается на всю доступную ширину своего родителя
+        disableGutters // убирает внутренние горизонтальные отступы (padding) у контейнера.
+      >
         <Box
           sx={{
             background: COLORS.main,
@@ -60,6 +63,7 @@ export default function Navbar() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            px: 2,
           }}
         >
           {/* Иконка-гамбургер */}
@@ -82,11 +86,10 @@ export default function Navbar() {
             <Typography
               sx={{
                 color: "#f5f5f5",
-                fontFamily:
-                  "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                fontFamily: "monospace",
                 fontSize: "0.95rem",
                 letterSpacing: 0.5,
-                textTransform: "none",
+                textTransform: "uppercase",
                 maxWidth: "220px",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
@@ -123,9 +126,8 @@ export default function Navbar() {
                     startIcon={getStartIcon(menu)}
                     sx={{
                       fontSize: "0.95rem",
-                      fontFamily:
-                        "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                      textTransform: "none",
+                      fontFamily: "monospace",
+                      textTransform: "uppercase",
                       justifyContent: "flex-start",
                       width: "100%",
                       borderRadius: "10px",
