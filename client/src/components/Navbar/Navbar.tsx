@@ -15,6 +15,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AppRegistrationRoundedIcon from "@mui/icons-material/AppRegistrationRounded";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const COLORS = {
   main: "#1d102f",
@@ -26,9 +27,33 @@ const COLORS = {
 
 export default function Navbar() {
   const [openMenu, setOpenMenu] = useState<boolean>(false); // явная типизация
-
+  const navigate = useNavigate(); // Навигация
+  const location = useLocation(); // Предоставляет объект с информацией о текущем URL.
   const menuItems: string[] = ["Главная", "Мой профиль", "Войти", "Выход"];
 
+  // Обработка кликов по пунктам меню
+  const handleMenuClick = (text: string) => {
+    if (text === "Главная") {
+      navigate("/");
+    } else if (text === "Войти") {
+      navigate("/signin");
+    } else if (text === "Мой профиль") {
+      navigate("/profile");
+    } else {
+      navigate("/");
+    }
+    setOpenMenu(false);
+  };
+
+  // Активность текущего меню
+  const isActivePath = (text: string) => {
+    if (text === "Главная") return location.pathname === "/";
+    if (text === "Войти") return location.pathname === "/signin";
+    if (text === "Мой профиль") return location.pathname === "/profile";
+    return false;
+  };
+
+  //  Дабваление иконок под каждое меню
   const getStartIcon = (menu: string) => {
     switch (menu) {
       case "Главная":
@@ -43,6 +68,7 @@ export default function Navbar() {
         return;
     }
   };
+
   return (
     <>
       <CssBaseline />
@@ -120,10 +146,12 @@ export default function Navbar() {
         >
           <List sx={{ mt: 1 }}>
             {menuItems.map((menu) => {
+              const isActive = isActivePath(menu);
               return (
                 <ListItem key={menu}>
                   <Button
                     startIcon={getStartIcon(menu)}
+                    onClick={() => handleMenuClick(menu)}
                     sx={{
                       fontSize: "0.95rem",
                       fontFamily: "monospace",
@@ -133,8 +161,10 @@ export default function Navbar() {
                       borderRadius: "10px",
                       px: 1.5,
                       py: 1,
-                      color: "#e5e7eb",
-                      backgroundColor: "transparent",
+                      color: isActive ? COLORS.accent : "#e5e7eb",
+                      backgroundColor: isActive
+                        ? COLORS.mainLight
+                        : "transparent",
                       "& .MuiSvgIcon-root": {
                         fontSize: "1.2rem",
                       },

@@ -8,9 +8,10 @@ datasource db {
 
 model User {
   id                  String     @id @default(cuid())
-  login               String     @unique
+  login               String     @unique                         // “найти уникальную запись”
   passwordHash        String?
-  username            String?    @unique
+  username            String?    @unique                         // “найти уникальную запись” @ => для одного поля
+  avatar              String? 
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
   accounts            Account[]                                  // “привязки к провайдерам”
@@ -23,5 +24,5 @@ model Account {
   userId              String                                    // внешний ключ (foreign key), ссылка на User.id
   user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([provider, providerAccountId])                       // @@unique защищает от дубликатов У одного провайдера один accountId может существовать только один раз
-  @@index([userId])                                             // @@index ускоряет работу
+  @@index([userId])                                             // @@index ускоряет работу, @@ => для всей модели
 }

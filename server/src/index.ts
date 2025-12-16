@@ -5,6 +5,7 @@ import cors from "cors";
 import session from "express-session"; // Подключаем express-session для управления сессиями
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
+import userAPIRouter from "./API/userAPIRouter";
 const app = express();
 const PORT = process.env.PORT;
 
@@ -45,6 +46,8 @@ async function main() {
     },
   };
   app.use(session(sessionConfig));
+
+  app.use("/api/users", userAPIRouter);
   app.listen(PORT, () => console.log(`Server started on ${PORT} PORT`));
 }
 
