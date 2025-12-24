@@ -5,7 +5,7 @@ import {
   SET_REGISTER_ERROR,
   LOGOUT_USER,
 } from "../types/types";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import type { Dispatch } from "redux";
 import type { UserActions } from "../types/types";
 
@@ -44,8 +44,15 @@ export const registersUser =
       });
       return true;
     } catch (error) {
-      console.log(error);
+      const errorRegister = error as AxiosError<{ error: string }>;
+      dispatch({
+        type: SET_REGISTER_ERROR,
+        payload: {
+          error: errorRegister.response?.data?.error ?? "Ошибка регистрации",
+        },
+      });
     }
+    return false;
   };
 
 // Тип для логирования

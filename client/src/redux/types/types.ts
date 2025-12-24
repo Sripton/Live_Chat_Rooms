@@ -21,9 +21,14 @@ export type UserPayload = {
   userAvatar: string | null;
 };
 
+// Tип для ошибки
+export type RegisterErrorPayload = {
+  error: string;
+};
+
 export type UserActions =
   | { type: typeof SET_REGISTER_USER; payload: UserPayload }
   | { type: typeof SET_AUTH_USER; payload: UserPayload }
   | { type: typeof SET_EDIT_USER; payload: Partial<UserPayload> } // все поля становятся необязательными
-  | { type: typeof SET_REGISTER_ERROR; payload: string }
+  | { type: typeof SET_REGISTER_ERROR; payload: RegisterErrorPayload }
   | { type: typeof LOGOUT_USER };

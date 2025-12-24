@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Container,
@@ -13,6 +13,8 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import KeyIcon from "@mui/icons-material/Key";
 import { useAppDispatch } from "../../redux/store/hooks";
 import { loginUser } from "../../redux/actions/userActions";
+
+import { googleAuthHandler } from "../../utils/googleAuth";
 const COLORS = {
   cardBg: "#231433",
   accentColor: "#b794f4",
@@ -23,13 +25,12 @@ type AuthInputs = {
   login: string;
   password: string;
 };
+
+// начальное состояние
+const INITIAL_INPUTS: AuthInputs = { login: "", password: "" };
 export default function Signin() {
-  // начальное состояние
-  const initialInputs: AuthInputs = {
-    login: "",
-    password: "",
-  };
-  const [inputs, setInputs] = useState<AuthInputs>(initialInputs);
+  const [inputs, setInputs] = useState<AuthInputs>(INITIAL_INPUTS);
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -111,10 +112,13 @@ export default function Signin() {
             <TextField
               name="login"
               value={inputs.login || ""}
+              type="email"
               onChange={inputsUsersHandler}
               variant="outlined"
               placeholder="Введите логин"
+              // autoComplete="off"
               InputProps={{
+                // autoComplete: "off",
                 startAdornment: (
                   <InputAdornment position="start">
                     <LockOpenIcon
@@ -158,7 +162,9 @@ export default function Signin() {
               type="password"
               variant="outlined"
               placeholder="Введите пароль"
+              autoComplete="off"
               InputProps={{
+                autoComplete: "off",
                 startAdornment: (
                   <InputAdornment position="start">
                     <KeyIcon sx={{ color: COLORS.textMuted, fontSize: 20 }} />
@@ -235,6 +241,28 @@ export default function Signin() {
           >
             Зарегистрироваться
           </Link>
+
+          <Button
+            type="button"
+            fullWidth
+            variant="outlined"
+            onClick={googleAuthHandler}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 999,
+              py: 1.2,
+              borderColor: "rgba(148,163,184,0.35)",
+              color: "#e5e7eb",
+              backgroundColor: "#1f112f",
+              "&:hover": {
+                borderColor: COLORS.accentColor,
+                backgroundColor: "#231433",
+              },
+            }}
+          >
+            Продолжить с Google
+          </Button>
         </Box>
       </Container>
     </Box>

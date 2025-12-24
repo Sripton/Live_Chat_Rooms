@@ -48,6 +48,9 @@ export default function userReduсer(
     case LOGOUT_USER:
       return initialState;
 
+    case SET_REGISTER_ERROR:
+      return { ...state, error: action.payload.error };
+
     default:
       return state;
   }

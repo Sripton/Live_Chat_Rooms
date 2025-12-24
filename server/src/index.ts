@@ -6,6 +6,9 @@ import session from "express-session"; // Подключаем express-session �
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
 import userAPIRouter from "./API/userAPIRouter";
+import passport from "passport";
+import "./auth/passportGoogle";
+import authAPIRouter from "./API/authAPIRouter";
 const app = express();
 const PORT = process.env.PORT;
 
@@ -46,7 +49,9 @@ async function main() {
     },
   };
   app.use(session(sessionConfig));
+  app.use(passport.initialize());
 
+  app.use("/auth", authAPIRouter);
   app.use("/api/users", userAPIRouter);
   app.listen(PORT, () => console.log(`Server started on ${PORT} PORT`));
 }

@@ -4,17 +4,18 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  
 }
 
 model User {
   id                  String     @id @default(cuid())
-  login               String     @unique                         // “найти уникальную запись”
+  login               String?     @unique                         // “найти уникальную запись”
   passwordHash        String?
   username            String?    @unique                         // “найти уникальную запись” @ => для одного поля
   avatar              String? 
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
-  accounts            Account[]                                  // “привязки к провайдерам”
+  accounts            Account[]                                  // “привязки к провайдерам”. виртуальное поле на уровне ORM
 }
 
 model Account {

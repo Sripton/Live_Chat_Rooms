@@ -17,6 +17,9 @@ import PersonIcon from "@mui/icons-material/Person";
 
 import { useAppDispatch } from "../../redux/store/hooks";
 import { registersUser } from "../../redux/actions/userActions";
+import { useAppSelector } from "../../redux/store/hooks";
+
+import { googleAuthHandler } from "../../utils/googleAuth";
 const COLORS = {
   cardBg: "#231433",
   accentColor: "#b794f4",
@@ -44,6 +47,8 @@ export default function Signup() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  const { error, isAuthenticated } = useAppSelector((store) => store.user);
+  // const isAuthenticated = useAppSelector((store) => store.user.isAuthenticated);
   const inputsUsersHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInputs((prev) => ({ ...prev, [name]: value }));
@@ -99,8 +104,18 @@ export default function Signup() {
                 "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             }}
           >
-            Вход
+            Регистарция
           </Typography>
+
+          {/* Ошибка */}
+          <Collapse
+            in={Boolean(error) && !isAuthenticated}
+            sx={{ width: "100%" }}
+          >
+            <Alert severity="error" sx={{ mb: 1.5 }}>
+              {error}
+            </Alert>
+          </Collapse>
 
           {/* Форма */}
           <Box
@@ -283,6 +298,28 @@ export default function Signup() {
           >
             Зарегистрироваться
           </Link>
+
+          <Button
+            type="button"
+            fullWidth
+            variant="outlined"
+            onClick={googleAuthHandler}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 999,
+              py: 1.2,
+              borderColor: "rgba(148,163,184,0.35)",
+              color: "#e5e7eb",
+              backgroundColor: "#1f112f",
+              "&:hover": {
+                borderColor: COLORS.accentColor,
+                backgroundColor: "#231433",
+              },
+            }}
+          >
+            Продолжить с Google
+          </Button>
         </Box>
       </Container>
     </Box>
