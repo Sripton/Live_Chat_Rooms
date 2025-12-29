@@ -4,9 +4,9 @@ import {
   SET_EDIT_USER,
   SET_REGISTER_ERROR,
   LOGOUT_USER,
-} from "../types/types";
+} from "../types/userTypes";
 
-import type { UserActions } from "../types/types";
+import type { UserActions } from "../types/userTypes";
 
 export type UserState = {
   userId: number | null;

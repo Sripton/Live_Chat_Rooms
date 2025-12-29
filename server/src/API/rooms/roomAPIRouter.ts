@@ -1,6 +1,5 @@
 import express from "express";
 import { prisma } from "../../lib/prisma";
-import { create } from "node:domain";
 const router = express.Router();
 
 type Room = {
@@ -49,7 +48,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
         isPrivate,
         ownerId: userId,
         // связь Room -> RoomAdmission через admissions
-        admissions: isPrivate ? { create: userId } : undefined, // prisma дополнит roomId, а userId передаем
+        admissions: isPrivate ? { create: { userId } } : undefined, // prisma дополнит roomId, а userId передаем
       },
     });
 
