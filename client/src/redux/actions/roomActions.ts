@@ -8,8 +8,15 @@ import type { AppDispatch } from "../store/store";
 import type { Room } from "../types/roomTypes";
 import axios from "axios";
 
-// export const fetchAllRooms =
-//   () => async (dispatch: Dispatch<RoomActions>) => {};
+export const fetchAllRooms = () => async (dispatch: AppDispatch) => {
+  try {
+    //  GET-запрос к API — получаем массив всех комнат
+    const { data } = await axios.get(`/api/rooms`);
+    dispatch({ type: GET_ALL_ROOMS, payload: data });
+  } catch (error) {
+    console.error("Ошибка при получении всех комнат:", error);
+  }
+};
 
 type RoomCreate = {
   nameRoom: string;

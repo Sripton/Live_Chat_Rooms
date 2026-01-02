@@ -26,25 +26,34 @@ const COLORS = {
   textMuted: "#9ca3af",
 };
 
+// Тип данных формы
 type RoomCreate = {
   nameRoom: string;
   isPrivate: boolean;
 };
 
 export default function ModalRoomCreate({ open, onClose }) {
+  // Инициализация состояния формы
   const initialInputs: RoomCreate = {
     nameRoom: "",
     isPrivate: false,
   };
+
+  // состояние для ввода данных
   const [inputs, setInputs] = useState<RoomCreate>(initialInputs);
   const dispatch = useAppDispatch();
+
+  // Обработчик ввода названия комнаты
   const handleRoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // берем данные TexfFields
     const raw = e.target.value; // одно текстовое поле
     // предотвращает ввод двух и более пробелов подряд прямо во время ввода
     const cleaned = raw.replace(/[^\S\r\n]{2,}/g, " "); // Любой пробельный символ, кроме \r и \n"
+    // обновляем только nameRoom, сохраняя isPrivate
     setInputs((prev) => ({ ...prev, nameRoom: cleaned }));
   };
 
+  // Обработчик чекбокса “Приватная”
   const handlePrivateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputs((prev) => ({ ...prev, isPrivate: e.target.checked }));
   };
@@ -68,17 +77,21 @@ export default function ModalRoomCreate({ open, onClose }) {
   };
 
   // финальная нормазация при завершении ввода
-  const handleNameBlur = () => setInputs((value) => normalizeSpaces(value));
+  const handleNameBlur = () =>
+    setInputs((prev) => ({
+      ...prev, // старые данные не трогаю 
+      nameRoom: normalizeSpaces(prev.nameRoom), // нормализуется только nameRoom
+    }));
 
-  // функция создания комнаты
+  // Отправка формы
   const roomSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
       nameRoom: normalizeSpaces(inputs.nameRoom),
-      isPrivate: !!inputs.isPrivate,
+      isPrivate: inputs.isPrivate,
     };
-    await dispatch(createRoomsSubmit(payload));
-    onClose();
+    await dispatch(createRoomsSubmit(payload)); // создаем комнату
+    onClose(); // закрываем модалку
   };
 
   return ReactDOM.createPortal(

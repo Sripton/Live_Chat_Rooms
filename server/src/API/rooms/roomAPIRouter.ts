@@ -58,4 +58,14 @@ router.post("/", async (req: express.Request, res: express.Response) => {
     return res.status(500).json({ message: "Ошибка при создании комнаты" });
   }
 });
+
+router.get("/", async (req: express.Request, res: express.Response) => {
+  try {
+    const rooms = await prisma.room.findMany();
+    return res.status(200).json(rooms);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: "Ошибка при получении комнат" });
+  }
+});
 export default router;
