@@ -68,4 +68,28 @@ router.get("/", async (req: express.Request, res: express.Response) => {
     return res.status(400).json({ message: "Ошибка при получении комнат" });
   }
 });
+
+router.get(
+  "/userrooms",
+  async (req: express.Request, res: express.Response) => {
+    try {
+      // забираем id из сессии
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Не авторизован" });
+      }
+
+      // ищем все комнаты данного пользователя
+      const rooms = await prisma.room.findMany({ where: { ownerId: userId } });
+
+      // возвращаем резултат
+      res.status(200).json(rooms);
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json({ message: "Ошибка при получении комнат" });
+    }
+  }
+);
+
 export default router;

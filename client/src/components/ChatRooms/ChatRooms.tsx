@@ -14,9 +14,11 @@ import {
   Grow,
   Zoom,
   Slide,
+  Link,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
+import { NavLink } from "react-router-dom";
 // импортируем иконки
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import SearchIcon from "@mui/icons-material/Search";
@@ -94,8 +96,10 @@ export default function ChatRooms() {
   // При изменении isMobile сбрасываем состояния
   useEffect(() => {
     // При переходе на мобильный - сворачиваем
-    setMobileOpenRoomsExpanded(false);
-    setMobilePrivateRoomsExpanded(false);
+    if (isMobile) {
+      setMobileOpenRoomsExpanded(false);
+      setMobilePrivateRoomsExpanded(false);
+    }
   }, [isMobile]);
 
   //  Вычисляем видимость
@@ -305,88 +309,97 @@ export default function ChatRooms() {
                       .slice(0, isMobile ? 3 : isLargeDesktop ? 8 : 6)
                       .map((room, index) => (
                         <Grow in={true} timeout={index * 100} key={room.id}>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 2,
-                              borderRadius: "12px",
-                              background: "rgba(255,255,255,0.02)",
-                              border: "1px solid rgba(255,255,255,0.05)",
-                              cursor: "pointer",
-                              transition:
-                                "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                              position: "relative",
-                              overflow: "hidden",
-                              "&::before": {
-                                content: '""',
-                                position: "absolute",
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: "3px",
-                                background:
-                                  "linear-gradient(180deg, #b794f4, transparent)",
-                                opacity: 0,
-                                transition: "opacity 0.3s ease",
-                              },
-                              "&:hover": {
-                                transform: "translateX(4px)",
-                                background: "rgba(183,148,244,0.08)",
-                                borderColor: "rgba(183,148,244,0.3)",
-                                boxShadow: "0 4px 20px rgba(183,148,244,0.15)",
-                                "&::before": {
-                                  opacity: 1,
-                                },
-                              },
-                              ...styleAnimation(index),
-                            }}
+                          <Box
+                            component={NavLink}
+                            to={`/chatcards/${room.id}`}
+                            sx={{ textDecoration: "none" }}
                           >
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              spacing={1.5}
+                            <Paper
+                              elevation={0}
+                              sx={{
+                                p: 2,
+                                borderRadius: "12px",
+                                background: "rgba(255,255,255,0.02)",
+                                border: "1px solid rgba(255,255,255,0.05)",
+                                cursor: "pointer",
+                                transition:
+                                  "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                                position: "relative",
+                                overflow: "hidden",
+                                "&::before": {
+                                  content: '""',
+                                  position: "absolute",
+                                  left: 0,
+                                  top: 0,
+                                  bottom: 0,
+                                  width: "3px",
+                                  background:
+                                    "linear-gradient(180deg, #b794f4, transparent)",
+                                  opacity: 0,
+                                  transition: "opacity 0.3s ease",
+                                },
+                                "&:hover": {
+                                  transform: "translateX(4px)",
+                                  background: "rgba(183,148,244,0.08)",
+                                  borderColor: "rgba(183,148,244,0.3)",
+                                  boxShadow:
+                                    "0 4px 20px rgba(183,148,244,0.15)",
+                                  "&::before": {
+                                    opacity: 1,
+                                  },
+                                },
+                                ...styleAnimation(index),
+                              }}
                             >
-                              <Box
-                                sx={{
-                                  width: 32,
-                                  height: 32,
-                                  borderRadius: "10px",
-                                  background: "rgba(183,148,244,0.1)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  flexShrink: 0,
-                                }}
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={1.5}
                               >
-                                🌐
-                              </Box>
-                              <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Typography
+                                <Box
                                   sx={{
-                                    fontWeight: 500,
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontSize: isMobile ? "0.875rem" : "0.95rem",
-                                    color: "#e5e7eb",
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: "10px",
+                                    background: "rgba(183,148,244,0.1)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    flexShrink: 0,
                                   }}
                                 >
-                                  {room.nameRoom}
-                                </Typography>
-                                <Typography
-                                  sx={{
-                                    fontSize: "0.75rem",
-                                    color: COLORS.textMuted,
-                                    mt: 0.25,
-                                  }}
-                                >
-                                  {" "}
-                                  Участников: {0}
-                                </Typography>
-                              </Box>
-                            </Stack>
-                          </Paper>
+                                  🌐
+                                </Box>
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                  <Typography
+                                    sx={{
+                                      fontWeight: 500,
+                                      fontFamily: "'Inter', sans-serif",
+                                      fontSize: isMobile
+                                        ? "0.875rem"
+                                        : "0.95rem",
+                                      color: "#e5e7eb",
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                  >
+                                    {room.nameRoom}
+                                  </Typography>
+                                  <Typography
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                      color: COLORS.textMuted,
+                                      mt: 0.25,
+                                    }}
+                                  >
+                                    {" "}
+                                    Участников: {0}
+                                  </Typography>
+                                </Box>
+                              </Stack>
+                            </Paper>
+                          </Box>
                         </Grow>
                       ))}
 

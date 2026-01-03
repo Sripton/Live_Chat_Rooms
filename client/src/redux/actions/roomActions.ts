@@ -18,10 +18,12 @@ export const fetchAllRooms = () => async (dispatch: AppDispatch) => {
   }
 };
 
+// тип для создания комнаты
 type RoomCreate = {
   nameRoom: string;
   isPrivate: boolean;
 };
+// Асинхронная функция для отправки формы создания комнаты на сервер
 export const createRoomsSubmit =
   (inputs: RoomCreate) => async (dispatch: AppDispatch) => {
     try {
@@ -31,3 +33,13 @@ export const createRoomsSubmit =
       console.log(error);
     }
   };
+
+//  Асинхронная функция для получения всех комнат пользователя
+export const fetchUserRooms = () => async (dispatch: AppDispatch) => {
+  try {
+    const { data } = await axios.get(`/api/rooms/userrooms`);
+    dispatch({ type: GET_USER_ROOM, payload: data });
+  } catch (error) {
+    console.error("Ошибка при получении  комнат для пользователя:", error);
+  }
+};

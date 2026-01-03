@@ -6,6 +6,7 @@ import ChatRooms from "./components/ChatRooms/ChatRooms.tsx";
 import Signup from "./components/Signup/Signup.tsx";
 import Signin from "./components/Signin/Signin.tsx";
 import UserDashBoard from "./components/UserDashBoard/UserDashBoard.tsx";
+import ChatCards from "./components/ChatCards/ChatCards.tsx";
 import { Provider } from "react-redux";
 import { store } from "./redux/store/store.ts";
 import axios from "axios";
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { index: true, element: <ChatRooms /> },
       { path: "signup", element: <Signup /> },
       { path: "signin", element: <Signin /> },
+      { path: "chatcards/:id", element: <ChatCards /> },
       { path: "profile", element: <UserDashBoard /> },
     ],
   },
