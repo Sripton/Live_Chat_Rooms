@@ -10,6 +10,7 @@ import passport from "passport";
 import "./auth/passportGoogle";
 import authAPIRouter from "./API/users/authAPIRouter";
 import roomAPIRouter from "./API/rooms/roomAPIRouter";
+import roomRequestAPIRouter from "./API/roomRequest/roomRequestAPIRouter";
 const app = express();
 const PORT = process.env.PORT;
 
@@ -55,6 +56,7 @@ async function main() {
   app.use("/auth", authAPIRouter);
   app.use("/api/users", userAPIRouter);
   app.use("/api/rooms", roomAPIRouter);
+  app.use(`/api/roomRequest`, roomRequestAPIRouter);
   app.listen(PORT, () => console.log(`Server started on ${PORT} PORT`));
 }
 

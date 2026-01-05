@@ -34,8 +34,11 @@ import { useAppDispatch, useAppSelector } from "../../redux/store/hooks";
 
 import { fetchAllRooms } from "../../redux/actions/roomActions";
 
-// импортируем компоненент модальное окно ModalRoomCreate
+// импортируем компоненент модальное окно ModalRoomCreate для создания комнаты
 import ModalRoomCreate from "../ModalRoomCreate";
+
+// импортируем компоненент модальное окно ModalRoomRequest для создания запроса
+import ModalRoomRequest from "../ModalRoomRequest";
 
 const COLORS = {
   mainColor: "#1d102f",
@@ -71,6 +74,8 @@ export default function ChatRooms() {
   // забираем комнаты из store
   const allRooms = useAppSelector((store) => store.room.allRooms);
   const dispatch = useAppDispatch();
+
+  // обновление комнат
   useEffect(() => {
     dispatch(fetchAllRooms());
   }, [dispatch]);
@@ -88,44 +93,6 @@ export default function ChatRooms() {
   const isMid = useMediaQuery("(min-width:1000px) and (max-width:1100px)");
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("lg")); // ≥ 1200px
 
-  // Состояния для мобильного сворачивания (инициализируем как свернутое на мобильных)
-  const [mobileOpenRoomsExpanded, setMobileOpenRoomsExpanded] = useState(false);
-  const [mobilePrivateRoomsExpanded, setMobilePrivateRoomsExpanded] =
-    useState(false);
-
-  // При изменении isMobile сбрасываем состояния
-  useEffect(() => {
-    // При переходе на мобильный - сворачиваем
-    if (isMobile) {
-      setMobileOpenRoomsExpanded(false);
-      setMobilePrivateRoomsExpanded(false);
-    }
-  }, [isMobile]);
-
-  //  Вычисляем видимость
-  const showOpenRooms = useMemo(() => {
-    return isMobile ? mobileOpenRoomsExpanded : true;
-  }, [isMobile, mobileOpenRoomsExpanded]);
-
-  const showPrivateRooms = useMemo(() => {
-    return isMobile ? mobilePrivateRoomsExpanded : true;
-  }, [isMobile, mobilePrivateRoomsExpanded]);
-
-  // Обработчики кликов
-  const handleOpenRoomsClick = () => {
-    if (isMobile) {
-      setMobileOpenRoomsExpanded((prev) => !prev); // true
-    }
-  };
-
-  const handlePrivateRoomsClick = () => {
-    if (isMobile) {
-      setMobilePrivateRoomsExpanded((prev) => !prev);
-    }
-  };
-
-  console.log("isMobile", isMobile);
-  console.log("showOpenRooms", showOpenRooms);
   // Анимация появления элементов
   const styleAnimation = (index: number) => ({
     animation: `fadeInUp 0.3s ease-out ${index * 0.05}s both`,
@@ -141,6 +108,45 @@ export default function ChatRooms() {
     },
   });
 
+  // ------------------- Видимость комнат под разные экраны ----------------------
+  // Состояния для мобильного сворачивания (инициализируем как свернутое на мобильных)
+  const [mobileOpenRoomsExpanded, setMobileOpenRoomsExpanded] = useState(false);
+  const [mobilePrivateRoomsExpanded, setMobilePrivateRoomsExpanded] =
+    useState(false);
+
+  // При изменении isMobile сбрасываем состояния
+  useEffect(() => {
+    // При переходе на мобильный - сворачиваем
+    if (isMobile) {
+      setMobileOpenRoomsExpanded(false);
+      setMobilePrivateRoomsExpanded(false);
+    }
+  }, [isMobile]);
+
+  //  Вычисляем видимость открытых комнат
+  const showOpenRooms = useMemo(() => {
+    return isMobile ? mobileOpenRoomsExpanded : true;
+  }, [isMobile, mobileOpenRoomsExpanded]);
+
+  //  Вычисляем видимость приватных комнат
+  const showPrivateRooms = useMemo(() => {
+    return isMobile ? mobilePrivateRoomsExpanded : true;
+  }, [isMobile, mobilePrivateRoomsExpanded]);
+
+  // Обработчики кликов на открытые комнаты
+  const handleOpenRoomsClick = () => {
+    if (isMobile) {
+      setMobileOpenRoomsExpanded((prev) => !prev); // true
+    }
+  };
+
+  // Обработчики кликов на приватные комнаты
+  const handlePrivateRoomsClick = () => {
+    if (isMobile) {
+      setMobilePrivateRoomsExpanded((prev) => !prev);
+    }
+  };
+
   // --------------------- Поиск комнат --------------------
   const [searchRooms, setSearchRooms] = useState("");
   const query = searchRooms.trim().toLowerCase();
@@ -149,6 +155,10 @@ export default function ChatRooms() {
     : allRooms
         .filter((room) => (room.nameRoom || "").toLowerCase().includes(query))
         .sort((a, b) => (a?.nameRoom || "").localeCompare(b?.nameRoom || ""));
+
+  // ---------------- Запросы к приватным комнатам -------------------
+  // состоятние для открытия/закрытия модального окна
+  const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
 
   return (
     <Box
@@ -311,6 +321,7 @@ export default function ChatRooms() {
                         <Grow in={true} timeout={index * 100} key={room.id}>
                           <Box
                             component={NavLink}
+                            // перейти в открытую комнату может любой пользователь
                             to={`/chatcards/${room.id}`}
                             sx={{ textDecoration: "none" }}
                           >
@@ -408,7 +419,7 @@ export default function ChatRooms() {
                       <Zoom in={true} timeout={500}>
                         <Button
                           fullWidth
-                          onClick={() => navigate("/rooms/open")}
+                          // onClick={() => navigate("/rooms/open")}
                           sx={{
                             mt: 1,
                             textTransform: "none",
@@ -527,6 +538,7 @@ export default function ChatRooms() {
                   )}
                 </Stack>
               </Box>
+
               {/* Список приватных комнат */}
               <Collapse in={!isMobile || showPrivateRooms}>
                 <Box sx={{ p: isMobile ? 2 : 2.5 }}>
@@ -535,88 +547,97 @@ export default function ChatRooms() {
                       .slice(0, isMobile ? 3 : isLargeDesktop ? 6 : 8)
                       .map((room, index) => (
                         <Grow in={true} timeout={index * 100} key={room.id}>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 2,
-                              borderRadius: "12px",
-                              background: "rgba(255,255,255,0.02)",
-                              border: "1px solid rgba(255,255,255,0.05)",
-                              cursor: "pointer",
-                              transition:
-                                "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                              position: "relative",
-                              overflow: "hidden",
-                              "&::before": {
-                                content: '""',
-                                position: "absolute",
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: "3px",
-                                background:
-                                  "linear-gradient(180deg, #b794f4, transparent)",
-                                opacity: 0,
-                                transition: "opacity 0.3s ease",
-                              },
-                              "&:hover": {
-                                transform: "translateX(4px)",
-                                background: "rgba(183,148,244,0.08)",
-                                borderColor: "rgba(183,148,244,0.3)",
-                                boxShadow: "0 4px 20px rgba(183,148,244,0.15)",
-                                "&::before": {
-                                  opacity: 1,
-                                },
-                              },
-                              ...styleAnimation(index),
-                            }}
+                          <Box
+                            component={NavLink}
+                            sx={{ textDecoration: "none" }}
+                            onClick={() => setOpenRequestModal((prev) => !prev)}
                           >
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              spacing={1.5}
+                            <Paper
+                              elevation={0}
+                              sx={{
+                                p: 2,
+                                borderRadius: "12px",
+                                background: "rgba(255,255,255,0.02)",
+                                border: "1px solid rgba(255,255,255,0.05)",
+                                cursor: "pointer",
+                                transition:
+                                  "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                                position: "relative",
+                                overflow: "hidden",
+                                "&::before": {
+                                  content: '""',
+                                  position: "absolute",
+                                  left: 0,
+                                  top: 0,
+                                  bottom: 0,
+                                  width: "3px",
+                                  background:
+                                    "linear-gradient(180deg, #b794f4, transparent)",
+                                  opacity: 0,
+                                  transition: "opacity 0.3s ease",
+                                },
+                                "&:hover": {
+                                  transform: "translateX(4px)",
+                                  background: "rgba(183,148,244,0.08)",
+                                  borderColor: "rgba(183,148,244,0.3)",
+                                  boxShadow:
+                                    "0 4px 20px rgba(183,148,244,0.15)",
+                                  "&::before": {
+                                    opacity: 1,
+                                  },
+                                },
+                                ...styleAnimation(index),
+                              }}
                             >
-                              <Box
-                                sx={{
-                                  width: 32,
-                                  height: 32,
-                                  borderRadius: "10px",
-                                  background: "rgba(183,148,244,0.1)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  flexShrink: 0,
-                                }}
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={1.5}
                               >
-                                🔒
-                              </Box>
-                              <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Typography
+                                <Box
                                   sx={{
-                                    fontWeight: 500,
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontSize: isMobile ? "0.875rem" : "0.95rem",
-                                    color: "#e5e7eb",
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: "10px",
+                                    background: "rgba(183,148,244,0.1)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    flexShrink: 0,
                                   }}
                                 >
-                                  {room.nameRoom}
-                                </Typography>
-                                <Typography
-                                  sx={{
-                                    fontSize: "0.75rem",
-                                    color: COLORS.textMuted,
-                                    mt: 0.25,
-                                  }}
-                                >
-                                  {" "}
-                                  Требуется доступ
-                                </Typography>
-                              </Box>
-                            </Stack>
-                          </Paper>
+                                  🔒
+                                </Box>
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                  <Typography
+                                    sx={{
+                                      fontWeight: 500,
+                                      fontFamily: "'Inter', sans-serif",
+                                      fontSize: isMobile
+                                        ? "0.875rem"
+                                        : "0.95rem",
+                                      color: "#e5e7eb",
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                  >
+                                    {room.nameRoom}
+                                  </Typography>
+                                  <Typography
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                      color: COLORS.textMuted,
+                                      mt: 0.25,
+                                    }}
+                                  >
+                                    {" "}
+                                    Требуется доступ
+                                  </Typography>
+                                </Box>
+                              </Stack>
+                            </Paper>
+                          </Box>
                         </Grow>
                       ))}
                     {privateRooms.length >
@@ -624,7 +645,7 @@ export default function ChatRooms() {
                       <Zoom in={true} timeout={500}>
                         <Button
                           fullWidth
-                          onClick={() => navigate("/rooms/open")}
+                          // onClick={() => navigate("/rooms/open")}
                           sx={{
                             mt: 1,
                             textTransform: "none",
@@ -1340,61 +1361,68 @@ export default function ChatRooms() {
             )}
           </Box>
         </Grid>
+
+        {/* FAB для создания комнаты */}
+        <Zoom in={true} timeout={1000}>
+          <Fab
+            onClick={handleCreateRoomClick}
+            sx={{
+              position: "fixed",
+              bottom: {
+                xs: 20,
+                sm: 24,
+                md: 32,
+              },
+              right: {
+                xs: 20,
+                sm: 24,
+                md: 32,
+              },
+              width: {
+                xs: 56,
+                sm: 64,
+                md: 72,
+              },
+              height: {
+                xs: 56,
+                sm: 64,
+                md: 72,
+              },
+              background: "linear-gradient(135deg, #b794f4 0%, #8b5cf6 100%)",
+              color: "#1f2933",
+              "&:hover": {
+                background: "linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)",
+                transform: "scale(1.05)",
+              },
+              boxShadow: "0 12px 40px rgba(139, 92, 246, 0.4)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              animation: "float 3s ease-in-out infinite",
+              "@keyframes float": {
+                "0%, 100%": {
+                  transform: "translateY(0)",
+                },
+                "50%": {
+                  transform: "translateY(-8px)",
+                },
+              },
+            }}
+          >
+            <AddIcon sx={{ fontSize: { xs: 28, sm: 30, md: 32 } }} />
+          </Fab>
+        </Zoom>
       </Grid>
-      {/* FAB для создания комнаты */}
-      <Zoom in={true} timeout={1000}>
-        <Fab
-          onClick={handleCreateRoomClick}
-          sx={{
-            position: "fixed",
-            bottom: {
-              xs: 20,
-              sm: 24,
-              md: 32,
-            },
-            right: {
-              xs: 20,
-              sm: 24,
-              md: 32,
-            },
-            width: {
-              xs: 56,
-              sm: 64,
-              md: 72,
-            },
-            height: {
-              xs: 56,
-              sm: 64,
-              md: 72,
-            },
-            background: "linear-gradient(135deg, #b794f4 0%, #8b5cf6 100%)",
-            color: "#1f2933",
-            "&:hover": {
-              background: "linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)",
-              transform: "scale(1.05)",
-            },
-            boxShadow: "0 12px 40px rgba(139, 92, 246, 0.4)",
-            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            animation: "float 3s ease-in-out infinite",
-            "@keyframes float": {
-              "0%, 100%": {
-                transform: "translateY(0)",
-              },
-              "50%": {
-                transform: "translateY(-8px)",
-              },
-            },
-          }}
-        >
-          <AddIcon sx={{ fontSize: { xs: 28, sm: 30, md: 32 } }} />
-        </Fab>
-      </Zoom>
-      {/* Модальное окно создания комнаты */}
+
+      {/*Открытие  Модальное окно для создания комнаты */}
       {openModalRoomCreate && (
         <ModalRoomCreate
           open={openModalRoomCreate}
           onClose={() => setOpenModalRoomCreate(false)}
         />
+      )}
+
+      {/*Открытие  Модальное окно для создания запроса к приватной комнате */}
+      {openRequestModal && (
+        <ModalRoomRequest openRequestModal={openRequestModal} />
       )}
     </Box>
   );

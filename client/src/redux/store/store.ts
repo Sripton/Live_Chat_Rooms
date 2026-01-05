@@ -7,12 +7,15 @@ import userReduser from "../reducer/userReduсer";
 // Импорт редьюсера для комнат, который обрабатывает действия, связанные с созданием  открытых или приватных комнат пользователем
 import roomReducer from "../reducer/roomReducer";
 
+// Импорт редьюсера, который обрабатывает действия, связанные с запросами на приватные комнаты
+import roomRequestReducer from "../reducer/RoomRequestReducer";
 // Экспорт конфигурированного хранилища (store)
 export const store = configureStore({
   // Объект всех редьюсеров приложения
   reducer: {
     user: userReduser, // Ключ `user` определяет ветку состояния Redux: state.user будет обрабатываться userReducer'ом
     room: roomReducer,
+    roomRequest: roomRequestReducer,
   },
 });
 

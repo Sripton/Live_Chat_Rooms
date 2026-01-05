@@ -112,8 +112,6 @@ export default function UserDashBoard() {
   //  ЭКРАНЫ МЕНЬШЕ lg (1200px)
   const isSmall = useMediaQuery(theme.breakpoints.down("lg"));
 
-  console.log("userRooms", userRooms);
-
   return (
     <div
       style={{

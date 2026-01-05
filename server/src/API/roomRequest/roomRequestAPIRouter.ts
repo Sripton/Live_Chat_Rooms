@@ -3,12 +3,12 @@ import { prisma } from "../../lib/prisma";
 import { Prisma } from "@prisma/client";
 
 const router = express.Router();
-type Request = {
+type CreateRoomRequestBody = {
   roomId: string;
 };
 router.post("/", async (req: express.Request, res: express.Response) => {
   try {
-    const { roomId } = req.body as Request;
+    const { roomId } = req.body as CreateRoomRequestBody;
     // Проверяем действительно ли пользователь авторизован
     const userId = req.session.userId;
 
@@ -42,6 +42,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       },
     });
 
+    // Если запрос сущесвтует, даем пользовтаелю информацию об статусе
     if (lastRequest) {
       if (lastRequest.status === "PENDING") {
         return res.status(400).json({ message: "Запрос уже отправлен" });
@@ -61,6 +62,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
       },
     });
 
+    // Отправляем на клиент n
     res.status(200).json({
       message: "Запрос на доступ отправлен",
       request: createRequest,
