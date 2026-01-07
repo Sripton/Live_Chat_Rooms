@@ -32,7 +32,7 @@ type RoomCreate = {
   isPrivate: boolean;
 };
 
-export default function ModalRoomCreate({ open, onClose }) {
+export default function ModalRoomCreate({ openRoomCreate, onCloseRoomCreate }) {
   // Инициализация состояния формы
   const initialInputs: RoomCreate = {
     nameRoom: "",
@@ -91,11 +91,11 @@ export default function ModalRoomCreate({ open, onClose }) {
       isPrivate: inputs.isPrivate,
     };
     await dispatch(createRoomsSubmit(payload)); // создаем комнату
-    onClose(); // закрываем модалку
+    onCloseRoomCreate(); // закрываем модалку
   };
 
   return ReactDOM.createPortal(
-    <Fade in={open}>
+    <Fade in={openRoomCreate}>
       <Box
         sx={{
           zIndex: 10001,
@@ -109,7 +109,7 @@ export default function ModalRoomCreate({ open, onClose }) {
           px: 2,
           py: 2,
         }}
-        onClick={onClose}
+        onClick={onCloseRoomCreate}
       >
         {/* Контейнер модалки */}
         <Box
@@ -131,7 +131,7 @@ export default function ModalRoomCreate({ open, onClose }) {
         >
           {/* Кнопка закрытия */}
           <Button
-            onClick={onClose}
+            onClick={onCloseRoomCreate}
             sx={{
               position: "absolute",
               top: 8,

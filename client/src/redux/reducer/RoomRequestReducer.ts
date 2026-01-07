@@ -1,6 +1,7 @@
 import {
   ROOM_REQUEST_SUCCESS,
   ROOM_REQUEST_ERROR,
+  CLEAR_ROOM_REQUEST_STATE,
 } from "../types/requestTypes";
 
 import type { RequestActions, RoomRequestState } from "../types/requestTypes";
@@ -29,7 +30,12 @@ export default function roomRequestReducer(
         ...state,
         status: null,
         error: action.payload.message,
+        request: null,
       };
+
+    case CLEAR_ROOM_REQUEST_STATE:
+      return initialState;
+
     default:
       return state;
   }

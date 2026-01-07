@@ -160,6 +160,9 @@ export default function ChatRooms() {
   // состоятние для открытия/закрытия модального окна
   const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
 
+  // Состояние для id комнаты к которой делается запрос
+  const [roomId, setRoomId] = useState<string>("");
+
   return (
     <Box
       sx={{
@@ -550,7 +553,10 @@ export default function ChatRooms() {
                           <Box
                             component={NavLink}
                             sx={{ textDecoration: "none" }}
-                            onClick={() => setOpenRequestModal((prev) => !prev)}
+                            onClick={() => {
+                              setOpenRequestModal((prev) => !prev);
+                              setRoomId(room.id);
+                            }}
                           >
                             <Paper
                               elevation={0}
@@ -1415,14 +1421,18 @@ export default function ChatRooms() {
       {/*Открытие  Модальное окно для создания комнаты */}
       {openModalRoomCreate && (
         <ModalRoomCreate
-          open={openModalRoomCreate}
-          onClose={() => setOpenModalRoomCreate(false)}
+          openRoomCreate={openModalRoomCreate}
+          onCloseRoomCreate={() => setOpenModalRoomCreate(false)}
         />
       )}
 
       {/*Открытие  Модальное окно для создания запроса к приватной комнате */}
       {openRequestModal && (
-        <ModalRoomRequest openRequestModal={openRequestModal} />
+        <ModalRoomRequest
+          openRequestCreate={openRequestModal}
+          onCloseRequestCreate={() => setOpenRequestModal((prev) => !prev)}
+          roomId={roomId}
+        />
       )}
     </Box>
   );

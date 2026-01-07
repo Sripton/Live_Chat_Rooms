@@ -4,6 +4,10 @@ export const ROOM_REQUEST_SUCCESS = "ROOM_REQUEST_SUCCESS";
 
 // Тип экшена если  статус запроса - отрицательный
 export const ROOM_REQUEST_ERROR = "ROOM_REQUEST_ERROR";
+
+// Тип экшена. Очистить статус после закрытия модалки
+export const CLEAR_ROOM_REQUEST_STATE = "CLEAR_ROOM_REQUEST_STATE";
+
 export type RoomRequest = {
   id: string;
   userId: string;
@@ -31,4 +35,5 @@ export type RoomRequestState = {
 
 export type RequestActions =
   | { type: typeof ROOM_REQUEST_SUCCESS; payload: RoomRequestSuccessResponse }
-  | { type: typeof ROOM_REQUEST_ERROR; payload: RoomRequestErrorResponse };
+  | { type: typeof ROOM_REQUEST_ERROR; payload: RoomRequestErrorResponse }
+  | { type: typeof CLEAR_ROOM_REQUEST_STATE; payload: RoomRequestState };
