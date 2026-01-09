@@ -40,6 +40,9 @@ import ModalRoomCreate from "../ModalRoomCreate";
 // импортируем компоненент модальное окно ModalRoomRequest для создания запроса
 import ModalRoomRequest from "../ModalRoomRequest";
 
+// импортируем компоненент модальное окно ModalRoomList для отображения всех комнат
+import ModalRoomList from "../ModalRoomList";
+
 const COLORS = {
   mainColor: "#1d102f",
   mainColorLight: "#2a183d",
@@ -92,6 +95,7 @@ export default function ChatRooms() {
   const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // ≥ 900px
   const isMid = useMediaQuery("(min-width:1000px) and (max-width:1100px)");
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("lg")); // ≥ 1200px
+  const isSmall = useMediaQuery(theme.breakpoints.down("lg"));
 
   // Анимация появления элементов
   const styleAnimation = (index: number) => ({
@@ -162,6 +166,12 @@ export default function ChatRooms() {
 
   // Состояние для id комнаты к которой делается запрос
   const [roomId, setRoomId] = useState<string>("");
+
+  // ---------------- Модальное окно отображения всехъ комнат --------------
+  const [openModalRoomList, setOpenModalRoomList] = useState<boolean>(false);
+
+  // состояние для переключения  статуса открытых/приватных комнат
+  const [roomsView, setRoomsView] = useState<string>("");
 
   return (
     <Box
@@ -422,7 +432,10 @@ export default function ChatRooms() {
                       <Zoom in={true} timeout={500}>
                         <Button
                           fullWidth
-                          // onClick={() => navigate("/rooms/open")}
+                          onClick={() => {
+                            setOpenModalRoomList(true);
+                            setRoomsView("open");
+                          }}
                           sx={{
                             mt: 1,
                             textTransform: "none",
@@ -651,7 +664,10 @@ export default function ChatRooms() {
                       <Zoom in={true} timeout={500}>
                         <Button
                           fullWidth
-                          // onClick={() => navigate("/rooms/open")}
+                          onClick={() => {
+                            setOpenModalRoomList(true);
+                            setRoomsView("private");
+                          }}
                           sx={{
                             mt: 1,
                             textTransform: "none",
@@ -1418,7 +1434,7 @@ export default function ChatRooms() {
         </Zoom>
       </Grid>
 
-      {/*Открытие  Модальное окно для создания комнаты */}
+      {/*Открытие  Модального окна для создания комнаты */}
       {openModalRoomCreate && (
         <ModalRoomCreate
           openRoomCreate={openModalRoomCreate}
@@ -1426,12 +1442,21 @@ export default function ChatRooms() {
         />
       )}
 
-      {/*Открытие  Модальное окно для создания запроса к приватной комнате */}
+      {/*Открытие  Модального окна для создания запроса к приватной комнате */}
       {openRequestModal && (
         <ModalRoomRequest
           openRequestCreate={openRequestModal}
-          onCloseRequestCreate={() => setOpenRequestModal((prev) => !prev)}
+          onCloseRequestCreate={() => setOpenRequestModal(false)}
           roomId={roomId}
+        />
+      )}
+      {/*Открытие  Модального окна для отображения всех комнат */}
+      {openModalRoomList && (
+        <ModalRoomList
+          openAll={openModalRoomList}
+          view={roomsView}
+          onCloseRoomList={() => setOpenModalRoomList(false)}
+          isSmall={isSmall}
         />
       )}
     </Box>

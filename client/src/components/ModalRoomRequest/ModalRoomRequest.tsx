@@ -39,11 +39,19 @@ const COLORS = {
 import { useAppSelector, useAppDispatch } from "../../redux/store/hooks";
 import { sendRoomRequest } from "../../redux/actions/requestActions";
 import { CLEAR_ROOM_REQUEST_STATE } from "../../redux/types/requestTypes";
+
+// Тип для пропсов компонента
+interface ModalRommRequestProps {
+  openRequestCreate: boolean;
+  onCloseRequestCreate: () => void;
+  roomId: string;
+}
 export default function ModalRoomRequest({
   openRequestCreate, // пропс состояния открытия модалки для  создания запроса
   onCloseRequestCreate, // пропс состяния закрытия модалки для  создания запроса
   roomId, // id комнаты к которой идет запрос
-}) {
+}: ModalRommRequestProps) {
+  // Забираем данные из store
   const { request, error, status } = useAppSelector(
     (store) => store.roomRequest
   );
@@ -80,9 +88,6 @@ export default function ModalRoomRequest({
     }
   }, [show]);
 
-  console.log("isSuccess", isSuccess);
-  console.log("isError", isError);
-  console.log("status", status);
   return ReactDOM.createPortal(
     <Fade in={openRequestCreate} timeout={300}>
       <Box
