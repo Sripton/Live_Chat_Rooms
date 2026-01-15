@@ -149,7 +149,9 @@ export default function UserDashBoard() {
   );
 
   // Забираем данные  RoomRequestStatus из store
-  const { updatingById } = useAppSelector((store) => store.roomRequestStatus);
+  const { updatingById, error } = useAppSelector(
+    (store) => store.roomRequestStatus
+  );
   const dispatch = useAppDispatch();
   //  забираем все комнаты пользователя
   useEffect(() => {
@@ -421,6 +423,22 @@ export default function UserDashBoard() {
               maxHeight: "60vh",
             }}
           >
+            {/* Если выкинет ошибку  */}
+            {error && (
+              <Box
+                sx={{
+                  mb: 2,
+                  p: 1.5,
+                  borderRadius: 2,
+                  border: "1px solid rgba(248,113,113,0.45)",
+                  backgroundColor: "rgba(248,113,113,0.12)",
+                }}
+              >
+                <Typography sx={{ color: "#fca5a5", fontSize: "0.9rem" }}>
+                  {error}
+                </Typography>
+              </Box>
+            )}
             <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {allRequests.map((request) => {
                 const isPending = request.status === "PENDING";
@@ -471,7 +489,7 @@ export default function UserDashBoard() {
                         ) : request.status === "REJECTED" ? (
                           <CancelIcon sx={{ color: "#f97373" }} />
                         ) : (
-                          <HourglassEmptyIcon />
+                          <HourglassEmptyIcon sx={{ color: "#eab308" }} />
                         )
                       ) : //Если запрос входящий И он в статусе PENDING
                       // пользователь может принять или отклонить

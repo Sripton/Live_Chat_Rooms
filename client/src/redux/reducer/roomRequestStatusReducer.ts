@@ -94,6 +94,17 @@ export default function roomRequestStatusReducer(
         updatingById: restUpdatingById,
       };
     }
+
+    case ROOM_REQUEST_UPDATE_ERROR: {
+      const { id, error } = action.payload;
+      const restUpdatingById = { ...state.updatingById };
+      delete restUpdatingById[id];
+      return {
+        ...state,
+        updatingById: restUpdatingById,
+        error,
+      };
+    }
     default:
       return state;
   }

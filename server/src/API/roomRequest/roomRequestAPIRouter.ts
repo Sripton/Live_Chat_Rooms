@@ -52,7 +52,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
         return res.status(400).json({ message: "Запрос уже отправлен" });
       }
       if (lastRequest.status === "REJECTED") {
-        return res.status(403).json({ message: "Доступ отклонён." });
+        return res.status(403).json({ message: "Доступ отклонён!." });
       }
     }
 
@@ -308,8 +308,11 @@ router.patch(
       });
     } catch (error: any) {
       console.log(error);
+      // На сервере   error.code
+      // На клиенте err.response.status (HTTP статус)
       if (typeof error?.code === "number") {
         console.log(error);
+        // err.response.data.message (сообщение)
         return res.status(error.code).json({ message: error.message });
       }
 
