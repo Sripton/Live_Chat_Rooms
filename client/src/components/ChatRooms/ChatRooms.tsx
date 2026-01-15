@@ -173,8 +173,9 @@ export default function ChatRooms() {
   // состояние для переключения  статуса открытых/приватных комнат
   const [roomsView, setRoomsView] = useState<string>("");
 
-  console.log("privateRooms", privateRooms);
-  console.log("userId", typeof userId);
+  // остояние для отслежитания по id к какой првиатной комнате идет запрос
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
+
   return (
     <Box
       sx={{
@@ -331,7 +332,7 @@ export default function ChatRooms() {
                 <Box sx={{ p: isMobile ? 2 : 2.5 }}>
                   <Stack spacing={1}>
                     {openRooms
-                      .slice(0, isMobile ? 3 : isLargeDesktop ? 8 : 6)
+                      .slice(0, isMobile ? 3 : isLargeDesktop ? 6 : 5)
                       .map((room, index) => (
                         <Grow in={true} timeout={index * 100} key={room.id}>
                           <Box
@@ -562,7 +563,7 @@ export default function ChatRooms() {
                 <Box sx={{ p: isMobile ? 2 : 2.5 }}>
                   <Stack spacing={1}>
                     {privateRooms
-                      .slice(0, isMobile ? 3 : isLargeDesktop ? 6 : 8)
+                      .slice(0, isMobile ? 3 : isLargeDesktop ? 6 : 5)
                       .map((room, index) => (
                         <Grow in={true} timeout={index * 100} key={room.id}>
                           <Box
@@ -1451,26 +1452,29 @@ export default function ChatRooms() {
       {/*Открытие  Модального окна для создания комнаты */}
       {openModalRoomCreate && (
         <ModalRoomCreate
-          openRoomCreate={openModalRoomCreate}
-          onCloseRoomCreate={() => setOpenModalRoomCreate(false)}
+          openRoomCreate={openModalRoomCreate} // для открытия модального окна при создании комнаты
+          onCloseRoomCreate={() => setOpenModalRoomCreate(false)} // для закрытия модального окна при создании комнаты
         />
       )}
 
       {/*Открытие  Модального окна для создания запроса к приватной комнате */}
       {openRequestModal && (
         <ModalRoomRequest
-          openRequestCreate={openRequestModal}
-          onCloseRequestCreate={() => setOpenRequestModal(false)}
-          roomId={roomId}
+          openRequestCreate={openRequestModal} // для открытия модального окна для отправки запроса
+          onCloseRequestCreate={() => setOpenRequestModal(false)} // для закрытия модального окна для отправки запроса
+          roomId={roomId} // id  пользователя
         />
       )}
       {/*Открытие  Модального окна для отображения всех комнат */}
       {openModalRoomList && (
         <ModalRoomList
-          openAll={openModalRoomList}
-          view={roomsView}
-          onCloseRoomList={() => setOpenModalRoomList(false)}
-          isSmall={isSmall}
+          openAll={openModalRoomList} // для открытия модалки
+          view={roomsView} // переключатель открытых/привтаных комнат
+          onCloseRoomList={() => setOpenModalRoomList(false)} // для закрытия модалки
+          isSmall={isSmall} // при мобильном экране
+          setOpenRequestModal={setOpenRequestModal} // для открытия модального окна для отправки запроса
+          setRoomId={setRoomId} // id данной комнаты
+          userId={userId} // id  пользователя
         />
       )}
     </Box>

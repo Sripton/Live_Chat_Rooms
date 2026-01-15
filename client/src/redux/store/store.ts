@@ -9,6 +9,10 @@ import roomReducer from "../reducer/roomReducer";
 
 // Импорт редьюсера, который обрабатывает действия, связанные с запросами на приватные комнаты
 import roomRequestReducer from "../reducer/RoomRequestReducer";
+
+// Импорт редьюсера, который обрабатывает действия, связанные с отображением  запросов
+import roomRequestStatusReducer from "../reducer/roomRequestStatusReducer";
+
 // Экспорт конфигурированного хранилища (store)
 export const store = configureStore({
   // Объект всех редьюсеров приложения
@@ -16,6 +20,7 @@ export const store = configureStore({
     user: userReduser, // Ключ `user` определяет ветку состояния Redux: state.user будет обрабатываться userReducer'ом
     room: roomReducer,
     roomRequest: roomRequestReducer,
+    roomRequestStatus: roomRequestStatusReducer,
   },
 });
 

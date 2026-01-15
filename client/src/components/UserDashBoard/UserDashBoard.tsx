@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -26,6 +26,11 @@ import BorderColorIcon from "@mui/icons-material/BorderColor";
 import CancelIcon from "@mui/icons-material/Cancel";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
+import {
+  fetchUserRequestsStatus,
+  updateRoomRequestStatus,
+} from "../../redux/actions/roomRequestStatusActions";
+
 // Тип для TabPanel
 interface TabPanelProps {
   index: number;
@@ -46,6 +51,51 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
+  );
+}
+
+//  Спинер запроса
+function ActionSpinner({ intent }) {
+  const isApproved = intent === "APPROVED";
+  const Icon = isApproved ? CheckCircleIcon : CancelIcon;
+
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 32,
+        height: 32,
+      }}
+    >
+      {/* Крутящийся loader в момент изменения статуса */}
+      <CircularProgress
+        size={32}
+        thickness={4}
+        sx={{
+          color: isApproved ? "success.main" : "error.main",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* Иконка которая появляется в момент прокрутки показывая статус запроса */}
+        <Icon
+          sx={{
+            fontSize: 20,
+            color: isApproved ? "success.main" : "error.main",
+            opacity: 0.9,
+          }}
+        />
+      </Box>
+    </Box>
   );
 }
 // Цвета для фона
@@ -93,11 +143,13 @@ export default function UserDashBoard() {
   };
 
   // ------------------ Данные из store ------------------
-  // Забираем данные из store
+  // Забираем данные  User из store
   const { userId, userAvatar, userName } = useAppSelector(
     (store) => store.user
   );
 
+  // Забираем данные  RoomRequestStatus из store
+  const { updatingById } = useAppSelector((store) => store.roomRequestStatus);
   const dispatch = useAppDispatch();
   //  забираем все комнаты пользователя
   useEffect(() => {
@@ -112,6 +164,29 @@ export default function UserDashBoard() {
   const theme = useTheme();
   //  ЭКРАНЫ МЕНЬШЕ lg (1200px)
   const isSmall = useMediaQuery(theme.breakpoints.down("lg"));
+
+  // ---------------- Загрузка запрсов -----------
+  // Забираем входящие и исходяшие запросы из store
+  const { incoming, outgoing } = useAppSelector(
+    (store) => store.roomRequestStatus
+  );
+  // зашружаем запросы
+  useEffect(() => {
+    // только для текущего пользователя
+    if (userId) {
+      dispatch(fetchUserRequestsStatus());
+    }
+  }, [userId, dispatch]); // зависимости
+
+  // объеденям все запросы
+  const allRequests = [
+    ...incoming.map((r) => ({ ...r, kind: "incoming" as const })),
+    ...outgoing.map((r) => ({ ...r, kind: "outgoing" as const })),
+  ];
+
+  console.log("updatingById", updatingById);
+
+  console.log("allRequests", allRequests);
 
   return (
     <div
@@ -346,7 +421,165 @@ export default function UserDashBoard() {
               maxHeight: "60vh",
             }}
           >
-            Запросы на приватные комнаты
+            <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {allRequests.map((request) => {
+                const isPending = request.status === "PENDING";
+
+                //  исходящие запросы пользователя
+                const isOutgoing = request.kind === "outgoing";
+
+                const isUpdating = updatingById[request.id];
+                console.log("isUpdating", isUpdating);
+
+                const altText = isOutgoing
+                  ? "Вы отправили запрос"
+                  : `${request?.requester?.username}` || "Пользователь";
+
+                const primaryText = isOutgoing
+                  ? `${request?.room?.nameRoom}`
+                  : `${request?.requester?.username}  отправил вам запрос, ${request?.room?.nameRoom}`;
+
+                return (
+                  <ListItem
+                    key={request.id}
+                    sx={{
+                      backgroundColor: COLORS.cardSoftBg,
+                      cursor: "pointer",
+                      boxShadow: "0 10px 24px rgba(0,0,0,0.85)",
+                      borderRadius: 3,
+                      border: "1px solid rgba(148,163,184,0.35)",
+                      "&:hover": {
+                        boxShadow: "0 16px 34px rgba(0,0,0,1)",
+                        transform: "translateY(-2px)",
+                        transition: "0.2s",
+                        borderColor: "rgba(183,148,244,0.7)",
+                        backgroundColor: "#331c47",
+                      },
+                    }}
+                    secondaryAction={
+                      // Проверяем, идёт ли обновление этого конкретного запроса isUpdating
+                      // Если именно этот запрос сейчас обновляется
+                      // если пользователь нажал «Принять / Отклонить»
+                      // показываем спинер, остальное ишнорируется
+                      isUpdating ? (
+                        <ActionSpinner intent={updatingById[request.id]} />
+                      ) : // Если запрос исходящий isOutgoing
+                      // У исходящих запросов нет кнопок, пользователь не  может их принять/отклонить
+                      isOutgoing ? (
+                        request.status === "APPROVED" ? (
+                          <CheckCircleIcon sx={{ color: "#22c55e" }} />
+                        ) : request.status === "REJECTED" ? (
+                          <CancelIcon sx={{ color: "#f97373" }} />
+                        ) : (
+                          <HourglassEmptyIcon />
+                        )
+                      ) : //Если запрос входящий И он в статусе PENDING
+                      // пользователь может принять или отклонить
+                      isPending ? (
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Button
+                            // Вызов экшен
+                            onClick={() =>
+                              dispatch(
+                                updateRoomRequestStatus(request.id, "APPROVED")
+                              )
+                            }
+                            variant="contained"
+                            sx={{
+                              backgroundColor: "#22c55e",
+                              color: "#0f172a",
+                              textTransform: "none",
+                              "&:hover": {
+                                backgroundColor: "#4ade80",
+                              },
+                            }}
+                          >
+                            Принять
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            sx={{
+                              color: "#f97373",
+                              borderColor: "#f97373",
+                              textTransform: "none",
+                              "&:hover": {
+                                borderColor: "#fca5a5",
+                                backgroundColor: "rgba(248,113,113,0.08)",
+                              },
+                            }}
+                            // Вызов экшен
+                            onClick={() =>
+                              dispatch(
+                                updateRoomRequestStatus(request.id, "REJECTED")
+                              )
+                            }
+                          >
+                            Отклонить
+                          </Button>
+                        </Box>
+                      ) : request.status === "APPROVED" ? (
+                        <CheckCircleIcon sx={{ color: "#22c55e" }} />
+                      ) : request.status === "REJECTED" ? (
+                        <CancelIcon sx={{ color: "#f97373" }} />
+                      ) : (
+                        <HourglassEmptyIcon sx={{ color: "#eab308" }} />
+                      )
+                    }
+                  >
+                    {(() => {
+                      return (
+                        <ListItemButton
+                          disableRipple
+                          disableTouchRipple
+                          sx={{
+                            bgcolor: "transparent",
+                            "&:hover": { bgcolor: "transparent" },
+                            "&.Mui-focusVisible": { bgcolor: "transparent" },
+                            "&.Mui-selected": { bgcolor: "transparent" },
+                            "&.Mui-selected:hover": { bgcolor: "transparent" },
+                            transition: "none",
+                            p: 0,
+                            cursor: "pointer",
+                          }}
+                        >
+                          {/* Аватар пользовтаеля */}
+                          <ListItemAvatar>
+                            <Avatar alt={altText} />
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={altText}
+                            primaryTypographyProps={{
+                              sx: {
+                                color: COLORS.accentColorStrong,
+                                fontSize: "0.95rem",
+                                fontFamily:
+                                  "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                              },
+                            }}
+                            secondary={
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                sx={{
+                                  fontFamily:
+                                    "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                                  color: COLORS.textMuted,
+                                  fontSize: "0.85rem",
+                                }}
+                              >
+                                {primaryText}
+                              </Typography>
+                            }
+                          >
+                            {request?.requester?.username}
+                          </ListItemText>
+                        </ListItemButton>
+                      );
+                    })()}
+                  </ListItem>
+                );
+              })}
+            </List>
           </Box>
         </TabPanel>
 

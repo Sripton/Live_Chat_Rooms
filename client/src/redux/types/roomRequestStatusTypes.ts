@@ -67,7 +67,6 @@ export interface RoomRequestsState {
   incoming: RoomRequestDTO[]; // входящие запросы (другие пользователи отправили)
   outgoing: RoomRequestDTO[]; // исходящие запросы (пользователь сам отправил)
   loading: boolean; // индикатор загрузки (фетчинг запросов)
-  updatingIds: Id[]; // спиннер только на одной кнопки
   updatingById: Record<Id, UpdatingStatus>; //  Record<KeysType, ValuesType>. id (ключ) -> 'accepted' | 'rejected' (значение)
   error: string | null; //  сообщение об ошибке
   counters: {

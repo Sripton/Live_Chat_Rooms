@@ -35,6 +35,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 import { useAppSelector } from "../../redux/store/hooks";
 import { lightGreen } from "@mui/material/colors";
+import { useNavigate } from "react-router-dom";
 
 const COLORS = {
   mainColor: "#1d102f",
@@ -62,6 +63,9 @@ export default function ModalRoomList({
   view,
   onCloseRoomList,
   isSmall,
+  userId,
+  setOpenRequestModal,
+  setRoomId,
 }: ModalRoomListProps) {
   // ----------------- Для создания адаптивного диалогового окна ------------
   // Добавляем тип Theme
@@ -130,7 +134,39 @@ export default function ModalRoomList({
   const handleToggleSort = () =>
     setSortMode((prev) => (prev === "az" ? "za" : "az"));
 
-  console.log("isMobile", isMobile);
+  // ---------------- Действия с комнатой --------------
+  // хук для навигации
+  const navigate = useNavigate();
+
+  // функция для проверки на доступ к комнатам
+  const handleEnterRoom = (room: any) => {
+    if (!room) return;
+
+    // Открытая комната — доступна всем
+    if (!room.isPrivate) {
+      navigate(`/chatcards/${room.id}`);
+      return;
+    }
+    // если приватная комната доступ только для зарегистрированных
+    if (!userId) {
+      navigate("/signin");
+      return;
+    }
+
+    // является ли пользовтель владельцем даннной комнаты
+    const isOwnerId = room.ownerId === userId;
+
+    // если пользователь яв-ся владельцем/ есть доступ
+    if (isOwnerId || room.hasAccess) {
+      navigate(`/chatcards/${room.id}`);
+      return;
+    }
+
+    setRoomId(room.id);
+    setOpenRequestModal(true);
+  };
+
+
 
   return (
     <Dialog
@@ -402,6 +438,8 @@ export default function ModalRoomList({
             <Grow in={true} timeout={index * 70} key={room.id}>
               <ListItem disablePadding sx={{ mb: 1 }}>
                 <ListItemButton
+                  // допуск в комнату
+                  onClick={() => handleEnterRoom(room)}
                   sx={{
                     borderRadius: "16px",
                     p: 2,
