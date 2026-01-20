@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma } from "../../lib/prisma";
 import { RoomRequestStatus } from "@prisma/client";
+import { requireRoomAccess } from "../../API/rooms/authRoomRouter";
 const router = express.Router();
 
 type Room = {
@@ -131,6 +132,7 @@ router.get("/", async (req: express.Request, res: express.Response) => {
   }
 });
 
+// Маршрут для получения конкретной комнаты по её ID
 router.get(
   "/userrooms",
   async (req: express.Request, res: express.Response) => {
@@ -151,7 +153,44 @@ router.get(
       console.log(error);
       return res.status(400).json({ message: "Ошибка при получении комнат" });
     }
-  }
+  },
 );
+
+// Маршрут для получения конкретной комнаты по её ID
+router.get(
+  "/getOneRoom/:id",
+  requireRoomAccess, // для защиты перехода в комнату где нет доступа
+  async (req: express.Request, res: express.Response) => {
+    const { id } = req.params;
+    try {
+      // находим комнату по ее id
+      const room = await prisma.room.findUnique({
+        where: { id },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              avatar: true,
+              username: true,
+            },
+          },
+        },
+      });
+
+      // если комната не найдена
+      if (!room) {
+        return res.status(404).json({ message: "Комната не найдена" });
+      }
+      return res.status(200).json(room);
+    } catch (error) {}
+  },
+);
+
+// router.delete("/del", async (req, res) => {
+//   await prisma.room.delete({
+//     where: { id: "cmkma0xz2000ej1os4l35nifm" },
+//   });
+//   return res.status(200).json({ message: "Delete cool" });
+// });
 
 export default router;

@@ -24,13 +24,14 @@ model User {
 
   // User может быть участником МНОГИХ комнат
   roomAdmissions                RoomAdmission[]                                      // Мои членства в комнатах
-  joinedRooms                   Room[]               @relation("UserJoinedRooms")    // Комнаты где я УЧАСТНИК
 
   // Я запросил доступ (я requester)
   roomRequestsMade              RoomRequest[]        @relation("RoomRequestRequester")
 
  // Ко мне пришли запросы (я owner)
  roomRequestsReceived           RoomRequest[]        @relation("RoomRequestOwner")
+
+ post                           Post[]
 }
 
 
@@ -56,10 +57,11 @@ model Room {
   owner                         User                  @relation("RoomOwner", fields: [ownerId], references: [id])
 
   admissions                    RoomAdmission[]                                     // Все членства в этой комнате
-  members                       User[]                 @relation("UserJoinedRooms")               // Все участники комнаты
 
   // все запросы в эту комнату
   requests                      RoomRequest[]
+  
+  post                          Post[]
 }
 
 // Модель для связи User - Room
@@ -113,6 +115,23 @@ model RoomRequest {
   @@index([ownerId])
   @@index([roomId])
   @@index([userId])
+}
+
+
+model Post {
+  id                          String                   @id @default(cuid())
+  postTitle                   String 
+  userId                      String                    
+  roomId                      String
+
+  user                        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room                        Room                     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([roomId])
 }
 
 

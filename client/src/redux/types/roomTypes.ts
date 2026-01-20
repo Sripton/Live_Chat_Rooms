@@ -32,17 +32,29 @@ export type RoomListDTO = Room & {
   hasAccess: boolean;
 };
 
+// тип для owner ( для одной комнаты)
+export type RoomOwner = {
+  id: string;
+  avatar: string | null;
+  username: string | null;
+};
+
+// отдельный DTO для “одной комнаты”. Расшиярем Room
+export type RoomOneDTO = Room & {
+  owner: RoomOwner;
+};
+
 // состояние редьюсера
 // то, что хранится в Redux store
 // контейнер, внутри которого лежат сущности
 export type RoomState = {
   allRooms: RoomListDTO[]; // массив всех комнат
   userRooms: Room[]; // массив всех комнат пользователя
-  currentRoom: Room | null; // данные текущей выбранной комнаты
+  currentRoom: RoomOneDTO | null; // данные текущей выбранной комнаты
 };
 
 export type RoomActions =
   | { type: typeof SET_CREATE_ROOM; payload: Room }
   | { type: typeof GET_ALL_ROOMS; payload: RoomListDTO[] }
   | { type: typeof GET_USER_ROOM; payload: Room[] }
-  | { type: typeof GET_ONE_ROOM; payload: Room | null };
+  | { type: typeof GET_ONE_ROOM; payload: RoomOneDTO | null };

@@ -5,7 +5,7 @@ import {
   GET_USER_ROOM,
 } from "../types/roomTypes";
 import type { AppDispatch } from "../store/store";
-import type { Room, RoomListDTO } from "../types/roomTypes";
+import type { Room, RoomListDTO, RoomOneDTO } from "../types/roomTypes";
 import axios from "axios";
 
 export const fetchAllRooms = () => async (dispatch: AppDispatch) => {
@@ -27,7 +27,6 @@ type RoomCreate = {
 export const createRoomsSubmit =
   (inputs: RoomCreate) => async (dispatch: AppDispatch) => {
     try {
-      
       //const { data } = await axios.post<Room>(`/api/rooms`, inputs);
       // dispatch({ type: SET_CREATE_ROOM, payload: data });
 
@@ -39,7 +38,7 @@ export const createRoomsSubmit =
     }
   };
 
-//  Асинхронная функция для получения всех комнат пользователя
+// Асинхронная функция для получения всех комнат пользователя
 export const fetchUserRooms = () => async (dispatch: AppDispatch) => {
   try {
     const { data } = await axios.get(`/api/rooms/userrooms`);
@@ -48,3 +47,16 @@ export const fetchUserRooms = () => async (dispatch: AppDispatch) => {
     console.error("Ошибка при получении  комнат для пользователя:", error);
   }
 };
+
+// Асинхронная функция для получения комнаты по ID
+export const getRoomById =
+  (roomId: string) => async (dispatch: AppDispatch) => {
+    try {
+      const { data } = await axios.get<RoomOneDTO>(
+        `/api/rooms/getOneRoom/${roomId}`,
+      );
+      dispatch({ type: GET_ONE_ROOM, payload: data });
+    } catch (error) {
+      console.error("Ошибка при получении  комнаты:", error);
+    }
+  };

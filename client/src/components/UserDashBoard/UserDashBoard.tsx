@@ -161,7 +161,7 @@ export default function UserDashBoard() {
   // ------------------ Данные из user store ------------------
   // Забираем данные  User из store
   const { userId, userAvatar, userName } = useAppSelector(
-    (store) => store.user
+    (store) => store.user,
   );
 
   //  забираем все комнаты пользователя
@@ -177,7 +177,7 @@ export default function UserDashBoard() {
   // ---------------- Данные из request store -----------
   // Забираем входящие и исходяшие запросы из store
   const { incoming, outgoing, updatingById, error } = useAppSelector(
-    (store) => store.roomRequestStatus
+    (store) => store.roomRequestStatus,
   );
   // загружаем запросы
   useEffect(() => {
@@ -286,8 +286,6 @@ export default function UserDashBoard() {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
-
-  console.log("allRequests", allRequests);
 
   return (
     <Box
@@ -815,8 +813,8 @@ export default function UserDashBoard() {
                         request.status === "APPROVED"
                           ? "✅"
                           : request.status === "REJECTED"
-                          ? "⛔"
-                          : "⏳";
+                            ? "⛔"
+                            : "⏳";
 
                       return (
                         <Grow in={true} timeout={index * 80} key={request.id}>
@@ -872,8 +870,8 @@ export default function UserDashBoard() {
                                     request.status === "APPROVED"
                                       ? "linear-gradient(180deg, #22c55e, transparent)"
                                       : request.status === "REJECTED"
-                                      ? "linear-gradient(180deg, #ef4444, transparent)"
-                                      : "linear-gradient(180deg, #eab308, transparent)",
+                                        ? "linear-gradient(180deg, #ef4444, transparent)"
+                                        : "linear-gradient(180deg, #eab308, transparent)",
                                   opacity: 0.9,
                                 },
                                 "&:hover": {
@@ -962,8 +960,8 @@ export default function UserDashBoard() {
                                       dispatch(
                                         updateRoomRequestStatus(
                                           request.id,
-                                          "APPROVED"
-                                        )
+                                          "APPROVED",
+                                        ),
                                       );
                                     }}
                                     sx={{
@@ -992,8 +990,8 @@ export default function UserDashBoard() {
                                       dispatch(
                                         updateRoomRequestStatus(
                                           request.id,
-                                          "REJECTED"
-                                        )
+                                          "REJECTED",
+                                        ),
                                       );
                                     }}
                                     sx={{
