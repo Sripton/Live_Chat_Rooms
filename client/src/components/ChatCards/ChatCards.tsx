@@ -34,7 +34,7 @@ const COLORS = {
 };
 
 // react hooks
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // redux hoooks
 import { useAppSelector, useAppDispatch } from "../../redux/store/hooks";
@@ -42,13 +42,24 @@ import { useDispatch } from "react-redux";
 
 // redux thunk
 import { getRoomById } from "../../redux/actions/roomActions";
+import PostEditor from "../PostEditor/PostEditor";
 
 export default function ChatCards() {
   const { id } = useParams(); // id комнаты из useParams
   const dispatch = useAppDispatch();
-  // ------------------ Room ------------------
+  const navigate = useNavigate();
+
+  //состояние для открытия форма для создания поста
+  const [isPostModalOpen, setIsPostModalOpen] = useState<boolean>(false);
+
+  const [postEditor, setPostEditor] = useState(null);
+
+  // ------------------ Store ------------------
   // Забираем из store  комнату текущую комнату
   const { currentRoom } = useAppSelector((store) => store.room);
+
+  // Забираем из store данные user
+  const { userId } = useAppSelector((store) => store.user);
 
   // загружаем комнату при рендере
   useEffect(() => {
@@ -57,14 +68,18 @@ export default function ChatCards() {
     }
   }, [id, dispatch]);
 
-  // состояние для отображения
-  const [isPostModalOpen, setIsPostModalOpen] = useState<boolean>(false);
+  const handleOpenPostModal = (post = null) => {
+    // если пользоаватель не зарегистрирвоан
+    if (!userId) {
+      navigate("/signin");
+      return;
+    }
 
-  // const handleOpenPostModal = ()  => {
-
-  // }
-
-  console.log("currentRoom", currentRoom);
+    setPostEditor(post);
+    //котрываем форму для создания поста
+    setIsPostModalOpen(true);
+  };
+  console.log("isPostModalOpen", isPostModalOpen);
 
   return (
     <Box
@@ -137,6 +152,7 @@ export default function ChatCards() {
           <Button
             variant="contained"
             disabled={isPostModalOpen}
+            onClick={() => handleOpenPostModal()}
             startIcon={<AddIcon />}
             sx={{
               bgcolor: COLORS.accentColor,
@@ -156,6 +172,16 @@ export default function ChatCards() {
             Добавить пост
           </Button>
         </Box>
+
+        {isPostModalOpen && (
+          <PostEditor
+            setIsPostModalOpen={setIsPostModalOpen}
+            mode={postEditor ? "edit" : "create"} // пропс для переклдчения создать/изменить пост
+            postEditor={postEditor} //  изменение поста
+            roomId={id} // id текущей комнаты
+            onCancel={() => setIsPostModalOpen(false)} // закрытие формы
+          />
+        )}
       </Box>
     </Box>
   );

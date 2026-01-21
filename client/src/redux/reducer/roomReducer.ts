@@ -15,7 +15,7 @@ const initialState: RoomState = {
 
 export default function roomReducer(
   state: RoomState = initialState, // state: RoomState — тип аргумента, = initialState — значение по умолчанию
-  action: RoomActions
+  action: RoomActions,
 ): RoomState {
   // TS проверит, что в каждом case  возвращаем RoomState
   const { type, payload } = action;
@@ -23,9 +23,7 @@ export default function roomReducer(
     case SET_CREATE_ROOM:
       return {
         ...state,
-        // allRooms: [payload, ...state.allRooms], после создания комнаты   перезагрузить список
         userRooms: [payload, ...state.userRooms], // отвечает только за userRooms
-        currentRoom: payload, // отвечает только за currentRoom
       };
 
     case GET_ALL_ROOMS:

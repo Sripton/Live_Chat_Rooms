@@ -11,7 +11,8 @@ import "./auth/passportGoogle";
 import authAPIRouter from "./API/users/authAPIRouter";
 import roomAPIRouter from "./API/rooms/roomAPIRouter";
 import roomRequestAPIRouter from "./API/roomRequest/roomRequestAPIRouter";
-import delRoom from "./API/testAPI/testAPI";
+import postAPIRouter from "./API/post/postAPIRouter";
+
 const app = express();
 const PORT = process.env.PORT;
 
@@ -23,7 +24,7 @@ app.use(
     // origin: "http://localhost:5173",
     origin: true,
     credentials: true,
-  })
+  }),
 ); // Настраиваем CORS, чтобы разрешить кросс-доменные запросы с передачей куков
 async function main() {
   const redisClient = createClient({ url: process.env.REDIS_URL });
@@ -58,7 +59,7 @@ async function main() {
   app.use("/api/users", userAPIRouter);
   app.use("/api/rooms", roomAPIRouter);
   app.use(`/api/roomRequest`, roomRequestAPIRouter);
-  app.use("/api/test", delRoom);
+  app.use("/api/posts", postAPIRouter);
   app.listen(PORT, () => console.log(`Server started on ${PORT} PORT`));
 }
 
