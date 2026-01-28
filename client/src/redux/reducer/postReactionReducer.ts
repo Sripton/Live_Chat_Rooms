@@ -3,12 +3,15 @@ import {
   GET_POST_REACTION_LIST,
 } from "../types/postReactionsTypes";
 
-import { ReactionState, ReactionActions } from "../types/postReactionsTypes";
+import type {
+  ReactionState,
+  ReactionActions,
+} from "../types/postReactionsTypes";
 
 // начальное состояние Redux. первое значение state, когда приложение загрузилось.
 const initialState: ReactionState = {
-  byPostId: {},
-  entities: {},
+  byPostId: {}, // как быстро это найти
+  entities: {}, // “что есть” [массив всех реакций]
   errorByPostId: {},
 };
 
@@ -17,6 +20,7 @@ export default function postReactionReducer(
   action: ReactionActions,
 ): ReactionState {
   switch (action.type) {
+    // создание реакции
     case SET_POST_REACTION_CREATE: {
       // const reaction = action.payload; // созданная реакция
       // state.entities[reaction.id] = reaction; // добавляем в entities {reaction.id: reaction}
@@ -47,6 +51,31 @@ export default function postReactionReducer(
       };
     }
 
+    case GET_POST_REACTION_LIST: {
+      const reactions = action.payload;
+
+      // не мутируем state
+      const newEntities = { ...state.entities }; // не мутируем state.entities
+      const newByPostId = { ...state.byPostId }; // не мутируем state.byPostId
+      reactions.forEach((r) => {
+        // если реакция обновилась (LIKE → DISLIKE) — всё ок
+        newEntities[r.id] = r; // перезапишется, если id существует
+
+        if (!newByPostId[r.postId]) {
+          // гарантируем, что массив существует
+          newByPostId[r.postId] = [];
+        }
+        // защита от дублей
+        if (!newByPostId[r.postId].includes(r.id)) {
+          newByPostId[r.postId].push(r.id);
+        }
+      });
+      return {
+        ...state,
+        byPostId: newByPostId,
+        entities: newEntities,
+      };
+    }
     default:
       return state;
   }

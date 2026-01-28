@@ -1,18 +1,36 @@
 import express from "express";
 import { prisma } from "../../lib/prisma";
+import { Reaction } from "@prisma/client";
 const router = express.Router();
-type PostParams = {
+
+// тип id
+type ParamsPostId = {
   postId: string;
-  reactionType: string;
 };
+
+// тип body
+type ParamsBody = {
+  reactionType: Reaction;
+};
+
+// generic-параметры в express.Request
+// Тип для req.params
+// Тип для res.locals (объект, содержащий локальные переменные ответа)
+// Тип для req.body
+// Тип для req.query (необязательный)
+
+// маршрут для создания реакций к постам
 router.post(
   "/:postId",
-  async (req: express.Request<PostParams>, res: express.Response) => {
+  async (
+    req: express.Request<ParamsPostId, any, ParamsBody>,
+    res: express.Response,
+  ) => {
     const { postId } = req.params;
     const { reactionType } = req.body;
     try {
       // забираем id пользователя из сессии
-      const userId = "cmkmi9cx700001yosy0bga6rb";
+      const userId = req.session.userId;
 
       if (!userId) {
         return res
@@ -65,5 +83,25 @@ router.post(
     }
   },
 );
+
+// маршрут для передачи реакций
+router.get("/:postId", async (req: express.Request, res: express.Response) => {
+  const { postId } = req.params as ParamsPostId;
+  try {
+    // забираем все реакции с сервера
+    const reactions = await prisma.postReaction.findMany({
+      where: { postId: postId },
+    });
+    // страхуем если реакций нет совсем
+    if (!reactions.length) {
+      return res.json([]);
+    }
+    // отдаем данные на клиент
+    return res.status(200).json(reactions);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ message: "Ошибка при передачи реакций" });
+  }
+});
 
 export default router;
