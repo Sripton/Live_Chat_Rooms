@@ -18,7 +18,6 @@ export const createPostReaction =
           reactionType,
         },
       );
-
       dispatch({ type: SET_POST_REACTION_CREATE, payload: data });
     } catch (error) {
       console.log("Реакция не создалась", error);

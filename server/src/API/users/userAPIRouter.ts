@@ -67,8 +67,8 @@ router.post("/signup", async (req: express.Request, res: express.Response) => {
 });
 
 router.post("/signin", async (req: express.Request, res: express.Response) => {
-  console.log("CONTENT-TYPE:", req.headers["content-type"]);
-  console.log("RAW BODY:", req.body);
+  // console.log("CONTENT-TYPE:", req.headers["content-type"]);
+  // console.log("RAW BODY:", req.body);
   try {
     const { login, password } = req.body as {
       login?: string;

@@ -7,7 +7,6 @@ import {
 import type { AppDispatch } from "../store/store";
 import type { Post, CreatePostDTO } from "../types/postTypes";
 import axios from "axios";
-export const fetchAllPost = () => {};
 
 // создание нового поста
 export const createPostSubmit =

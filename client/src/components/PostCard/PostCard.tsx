@@ -65,6 +65,8 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
     useEffect(() => {
       dispatch(getPostReactions(post.id));
     }, [dispatch, post.id]);
+
+    console.log("post", post);
     return (
       <Paper
         ref={ref}
