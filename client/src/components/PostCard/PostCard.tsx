@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -16,9 +16,15 @@ import ReplyIcon from "@mui/icons-material/Reply";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+// postTypes
 import type { Post } from "../../redux/types/postTypes";
 
+// commentTypes
+import type { Comment } from "../../redux/types/commentTypes";
+
 import { deletepost } from "../../redux/actions/postActions";
+
+import CommentEditor from "../CommentEditor/CommentEditor";
 
 import {
   createPostReaction,
@@ -28,6 +34,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../redux/store/hooks";
 
 import { selectReactionCountsByPostId } from "../../redux/selectors/postReactionsSelectors";
+import { useNavigate } from "react-router-dom";
 
 type PostCardProps = {
   handleOpenPostModal: (post: any) => void;
@@ -44,9 +51,33 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
     ref, // ref  - <Grow> (как и Slide, Collapse, Zoom) вешает ref на своего ребёнка, чтобы мерить размеры/делать reflow.
   ) => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+
+    // состояние для создания/изменения комментария
+    const [editComment, setEditComment] = useState<Comment | null>(null);
+
+    // состояние для отображения формы ответа на посты/комментарии
+    const [replyOpen, setReplyOpen] = useState(false);
+
+    // функция для  открытия формы создания комментария к посту
+    const handleReplyToPost = (postId: any) => {
+      // если пользоаватель не зарегистрирвоан
+      if (!userId) {
+        navigate("/signin");
+        return;
+      }
+      //  меняем состояние  reply
+      setReplyOpen((prev) => (prev === postId ? null : postId));
+
+      // если была открыта форма для создания поста, закрываем ее
+      // setIsPostModalOpen(false);
+    };
+
+    // количество реакций под каждым постом
     const counts = useAppSelector((state) =>
       selectReactionCountsByPostId(state, post.id),
     );
+
     // Анимация появления элементов
     const styleAnimation = (index: number) => ({
       animation: `fadeInUp 0.3s ease-out ${index * 0.05}s both`,
@@ -62,11 +93,13 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
       },
     });
 
+    // ?
     useEffect(() => {
       dispatch(getPostReactions(post.id));
     }, [dispatch, post.id]);
 
-    console.log("post", post);
+    console.log("replyOpen", replyOpen);
+
     return (
       <Paper
         ref={ref}
@@ -259,6 +292,7 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
           <Button
             size="small"
             startIcon={<ReplyIcon />}
+            onClick={() => handleReplyToPost(post.id)}
             sx={{
               color: COLORS.accentColor,
               minWidth: "auto",
@@ -318,6 +352,18 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
             </Box>
           )}
         </Box>
+
+        {/* Форма ответа для комментариев оставляемых к постам */}
+        {replyOpen && (
+          <Box sx={{ mt: 2 }}>
+            <CommentEditor
+              postId={post.id}
+              editComment={editComment}
+              parentId={null}
+              onCancel={() => setReplyOpen(false)}
+            />
+          </Box>
+        )}
       </Paper>
     );
   },

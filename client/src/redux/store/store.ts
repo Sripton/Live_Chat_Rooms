@@ -16,7 +16,11 @@ import roomRequestStatusReducer from "../reducer/roomRequestStatusReducer";
 // Импорт редьюсера, который обрабатывает действия, связанные с созданием  постов пользователем
 import postReducer from "../reducer/postReducer";
 
+// Импорт редьюсера, который обрабатывает действия, связанные с реакциями на посты
 import postReactionReducer from "../reducer/postReactionReducer";
+
+// Импорт редьюсера, который обрабатывает действия, связанные с реакциями на посты
+import commentReducer from "../reducer/commentReducer";
 
 // Экспорт конфигурированного хранилища (store)
 export const store = configureStore({
@@ -28,6 +32,7 @@ export const store = configureStore({
     roomRequestStatus: roomRequestStatusReducer,
     post: postReducer,
     postReaction: postReactionReducer,
+    comment: commentReducer,
   },
 });
 

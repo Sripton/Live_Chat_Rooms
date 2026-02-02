@@ -39,7 +39,7 @@ export default function BaseEditor({
     // создаем пост
     onSubmit(trimmed);
   };
-  console.log("value", value);
+
 
   return (
     <Slide in={true} direction="up" timeout={300}>

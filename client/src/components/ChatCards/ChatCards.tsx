@@ -54,10 +54,7 @@ import { useAppSelector, useAppDispatch } from "../../redux/store/hooks";
 import { getRoomById } from "../../redux/actions/roomActions";
 
 // функция передачи всех постов по id комнаты
-import { fetchPosts, deletepost } from "../../redux/actions/postActions";
-
-// функция создания реакций к постам
-import { createPostReaction } from "../../redux/actions/postReactionActions";
+import { fetchPosts } from "../../redux/actions/postActions";
 
 // redux types
 import { CLEAR_ROOM_POSTS } from "../../redux/types/postTypes";
@@ -99,14 +96,16 @@ export default function ChatCards() {
     dispatch(fetchPosts(String(id))); // загружаем все посты данной клмнаты
   }, [id, dispatch]);
 
+  // функция для открытия формы создания поста
   const handleOpenPostModal = (post?: Post | null) => {
     // если пользоаватель не зарегистрирвоан
     if (!userId) {
       navigate("/signin");
       return;
     }
-
+    // переключаем postEditor edit/create
     setPostEditor(post || null);
+
     //котрываем форму для создания поста
     setIsPostModalOpen(true);
   };

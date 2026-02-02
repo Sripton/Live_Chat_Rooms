@@ -5,7 +5,7 @@ import {
   DELETE_COMMENT,
 } from "../types/commentTypes";
 
-import { CommentState, CommentAction } from "../types/commentTypes";
+import type { CommentState, CommentAction } from "../types/commentTypes";
 
 // начальное состояние Redux. первое значение state, когда приложение загрузилось.
 const initialState: CommentState = {
@@ -22,17 +22,21 @@ export default function commentReducer(
 ): CommentState {
   switch (action.type) {
     case SET_CREATE_COMMENT: {
-      const comment = action.payload;
-      const postId = comment.postId;
-      const prevList = state.byPostId[postId] ?? [];
+      const comment = action.payload; // создаем комментарий
+      const postId = comment.postId; // забираем его PostId
+      const prevList = state.byPostId[postId] ?? []; // забираем из state.byPostId[по ключу postId] комментарии либо если нету []
       return {
-        ...state,
-        byPostId: {
-          ...state.byPostId,
-          [postId]: [...prevList, comment],
+        ...state, //  возвразаем текущий state
+        byPostId: { // по ключу byPostId
+          ...state.byPostId, // вохвращаем все поля 
+          [postId]: [...prevList, comment], // по ключу [postId]: [...сохраняем старые поля, добавялем новый сomment]
         },
       };
     }
+
+    
+
+
     default:
       return state;
   }

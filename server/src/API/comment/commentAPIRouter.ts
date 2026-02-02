@@ -1,5 +1,6 @@
 import express from "express";
 import { prisma } from "../../lib/prisma";
+import { Comment } from "@prisma/client";
 
 const router = express.Router();
 
@@ -84,6 +85,28 @@ router.post(`/:postId`, async (req: express.Request, res: express.Response) => {
       message: "Ошибка при написании ответа",
       error: error instanceof Error ? error.message : String(error),
     });
+  }
+});
+
+// Маршрут API для передачи комментариев на клиент
+router.get("/:postId", async (req: express.Request, res: express.Response) => {
+  const { postId } = req.params as ParamsId;
+  try {
+    const comments = await prisma.comment.findMany({
+      where: { postId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+    res.json(comments);
+  } catch (error) {
+    res.status(404).json({ message: "Сервер ответил с ошибкой" });
   }
 });
 
