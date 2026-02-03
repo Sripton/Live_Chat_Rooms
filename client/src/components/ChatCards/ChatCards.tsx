@@ -41,6 +41,7 @@ const COLORS = {
   textMuted: "#9ca3af",
   gradient: "linear-gradient(135deg, #2a183d 0%, #1d102f 100%)",
   dangerColor: "#ef4444",
+  accentLight: "#a78bfa",
 };
 
 // react hooks
@@ -109,6 +110,8 @@ export default function ChatCards() {
     //котрываем форму для создания поста
     setIsPostModalOpen(true);
   };
+
+  console.log("userId", userId);
 
   return (
     <Box

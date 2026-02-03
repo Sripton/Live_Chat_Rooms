@@ -21,8 +21,7 @@ router.post(`/:postId`, async (req: express.Request, res: express.Response) => {
   const { commentTitle, parentId } = req.body as ParamsBody;
   try {
     // Забираем сессию пользователя
-    // const userId = req.session.userId;
-    const userId = "cmkmia3lz00011yosti9uuj96";
+    const userId = req.session.userId;
 
     // Если пользовтаель не зарегистрирован не пропускаем дальше
     if (!userId)

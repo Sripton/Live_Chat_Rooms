@@ -24,18 +24,30 @@ import type { Comment } from "../../redux/types/commentTypes";
 
 import { deletepost } from "../../redux/actions/postActions";
 
+// компонент для открытия формы для создания/изменения комментриев
 import CommentEditor from "../CommentEditor/CommentEditor";
 
+// компонент отображения комментриев
+import CommentsCard from "../CommentsCard/CommentsCard";
+
+// redux postReaction
 import {
-  createPostReaction,
-  getPostReactions,
+  createPostReaction, // actions создания создания/изменения комментариев
+  getPostReactions, // actions полчучения всех комментариев
 } from "../../redux/actions/postReactionActions";
 
+// redux comment
+import { getComments } from "../../redux/actions/commentActions";
+
+// redux hooks
 import { useAppDispatch, useAppSelector } from "../../redux/store/hooks";
 
+// selector postReactions counts
 import { selectReactionCountsByPostId } from "../../redux/selectors/postReactionsSelectors";
+
 import { useNavigate } from "react-router-dom";
 
+// Тип для PostCard пропсов
 type PostCardProps = {
   handleOpenPostModal: (post: any) => void;
   isMobile: boolean;
@@ -58,6 +70,41 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
 
     // состояние для отображения формы ответа на посты/комментарии
     const [replyOpen, setReplyOpen] = useState(false);
+
+    // состояние для отображения комментариeв
+    const [showComments, setShowComments] = useState<string | null>(null);
+
+    // состояние для свернуть/развернуть  текст поста
+    const [expandedPost, setExpandedPost] = useState<Set<string>>(new Set());
+
+    // состояние для свернуть/развернуть  текст комменатрия
+    const [expandedComment, setExpandedComment] = useState<Set<string>>(
+      new Set(),
+    );
+
+    // функция скрыть/показать полный текст поста/комменатрия
+    const toggleExpanded = (type: "post" | "comment", id: string) => {
+      const toggle = (prev: Set<string>) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      };
+
+      if (type === "post") setExpandedPost(toggle);
+      if (type === "comment") setExpandedComment(toggle);
+    };
+
+    // для состояния
+    const isExpandedPost = expandedPost.has(post.id);
+
+    // данные из redux store
+    const { byPostId, countsByPostId } = useAppSelector(
+      (store) => store.comment,
+    );
+
+    // Комментарии
+    const comments = byPostId[post.id] ?? [];
 
     // функция для  открытия формы создания комментария к посту
     const handleReplyToPost = (postId: any) => {
@@ -93,12 +140,24 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
       },
     });
 
-    // ?
-    useEffect(() => {
-      dispatch(getPostReactions(post.id));
-    }, [dispatch, post.id]);
+    // функция переключатель открыть/закрыть комментарии
+    const toggleComments = (postId: string) => {
+      setShowComments((prev) => (prev === postId ? null : postId));
+    };
 
-    console.log("replyOpen", replyOpen);
+    // Рендер всех реакций каждого поста по id при закгрузке страницы
+    useEffect(() => {
+      dispatch(getPostReactions(post.id)); // диспатчим реакции на посты
+    }, [dispatch, post.id]); // зависимости
+
+    // Рендер всех коммнетриев каждого поста по id при закгрузке страницы
+    useEffect(() => {
+      dispatch(getComments(post.id)); // диспатчим все комментарии поста
+    }, [dispatch, post.id]); // зависимости
+
+    console.log("post", post.postTitle.length);
+
+    console.log("COLORS", COLORS);
 
     return (
       <Paper
@@ -200,7 +259,35 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
               fontFamily: "'Inter', sans-serif",
             }}
           >
-            {post.postTitle}
+            {post.postTitle && (
+              <>
+                {post.postTitle.length < 200 ? (
+                  post.postTitle
+                ) : (
+                  <>
+                    {expandedPost.has(post.id)
+                      ? post.postTitle
+                      : `${post.postTitle.substring(0, 200)}...`}
+
+                    <Button
+                      size="small"
+                      onClick={() => toggleExpanded("post", post.id)}
+                      sx={{
+                        ml: 0.5,
+                        minWidth: "auto",
+                        p: 0,
+                        color: COLORS.accentLight,
+                        fontSize: "0.85rem",
+                        fontWeight: 500,
+                        textTransform: "none",
+                      }}
+                    >
+                      {isExpandedPost ? "Свернуть" : "Читать далее"}
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
           </Typography>
         </Box>
 
@@ -267,6 +354,7 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
           {/* Комментарии */}
           <Button
             size="small"
+            onClick={() => toggleComments(post.id)}
             startIcon={<CommentIcon />}
             sx={{
               color: COLORS.textMuted,
@@ -285,7 +373,7 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
               "& .MuiButton-startIcon": { mr: 0.5 },
             }}
           >
-            0
+            {`${countsByPostId[post.id]}`}
           </Button>
 
           {/* Ответить */}
@@ -361,6 +449,23 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
               editComment={editComment}
               parentId={null}
               onCancel={() => setReplyOpen(false)}
+            />
+          </Box>
+        )}
+
+        {/* Отображение комментариев */}
+        {showComments && (
+          <Box
+            sx={{
+              mt: 2,
+              pt: 2,
+              borderTop: `1px solid ${COLORS.borderColor}`,
+            }}
+          >
+            <CommentsCard
+              comments={comments}
+              expandedComment={expandedComment}
+              toggleExpanded={toggleExpanded}
             />
           </Box>
         )}
