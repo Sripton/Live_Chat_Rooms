@@ -1,6 +1,6 @@
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Button, TextField, Paper, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import React, { useEffect, useState } from "react";
 import { Slide } from "@mui/material";
 
 type BaseEditorProps = {
@@ -20,10 +20,13 @@ export default function BaseEditor({
   // состояние ввода данных в форму
   const [value, setValue] = useState(initialValues);
 
+  // DOM
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
   // синхронизация при смене initialValue (редактирование другого поста)
   useEffect(() => {
     if (initialValues) {
-      setValue(initialValues || "");
+      setValue(initialValues ?? "");
     }
   }, [initialValues]);
 
@@ -40,10 +43,28 @@ export default function BaseEditor({
     onSubmit(trimmed);
   };
 
+  // закрыть редактор по клику/тачу вне компонента
+  useEffect(() => {
+    const handlePointerDown = (e: PointerEvent) => {
+      const el = rootRef.current;
+      if (!el) return;
+
+      // если клик ВНУТРИ — ничего не делаем
+      if (el.contains(e.target as Node)) return;
+
+      // если клик СНАРУЖИ — закрываем
+      onCancel?.();
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown, true);
+    return () =>
+      window.removeEventListener("pointerdown", handlePointerDown, true);
+  }, [onCancel]);
 
   return (
     <Slide in={true} direction="up" timeout={300}>
       <Paper
+        ref={rootRef}
         elevation={0}
         component="form"
         onSubmit={submit}

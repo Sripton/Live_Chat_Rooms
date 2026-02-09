@@ -2,10 +2,13 @@ import React from "react";
 import BaseEditor from "../BaseEditor/BaseEditor";
 
 // commentTypes
-import type { Comment, CreateCommentDTO } from "../../redux/types/commentTypes";
+import type { Comment } from "../../redux/types/commentTypes";
 
 // commentActions
-import { createComment } from "../../redux/actions/commentActions";
+import {
+  createCommentActions,
+  editCommentActions,
+} from "../../redux/actions/commentActions";
 
 // store/hooks
 import { useAppDispatch } from "../../redux/store/hooks";
@@ -24,15 +27,24 @@ export default function CommentEditor({
   onCancel,
 }: CommentEditorProps) {
   const dispatch = useAppDispatch();
+  console.log("editComment", editComment);
   return (
     <BaseEditor
       initialValues={editComment?.commentTitle ?? ""}
       onSubmit={async (value: string) => {
-        const dtoComment: CreateCommentDTO = {
-          commentTitle: value,
-          parentId,
-        };
-        dispatch(createComment(postId, dtoComment));
+        if (editComment) {
+          // РЕДАКТИРОВАНИЕ
+          dispatch(editCommentActions(editComment.id, value));
+        } else {
+          // СОЗДАНИЕ
+          dispatch(
+            createCommentActions(postId, {
+              commentTitle: value,
+              parentId: parentId,
+            }),
+          );
+        }
+
         onCancel();
       }}
     />

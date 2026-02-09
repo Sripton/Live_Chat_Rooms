@@ -11,7 +11,7 @@ import type {
 // начальное состояние Redux. первое значение state, когда приложение загрузилось.
 const initialState: ReactionState = {
   byPostId: {}, // как быстро это найти
-  entities: {}, // “что есть” [массив всех реакций]
+  entities: {}, //  [массив всех реакций]
   errorByPostId: {},
 };
 

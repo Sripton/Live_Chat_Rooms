@@ -60,20 +60,14 @@ export interface CreateCommentDTO {
   parentId?: string | null;
 }
 
-// DTO для редактирования
-export interface UpdateCommentDTO {
-  id: string; // чтобы найти и заменить в массиве
-  commentTitle: string;
-}
-
 export interface CommentState {
   // включает в себя  и другие поля.
   byPostId: Record<string, Comment[]>; // все комментарии по ключу postId
   countsByPostId: Record<string, number>; // ко-во всех комментариев по ключу postId
   profile: {
-    // ответы на посты пользовтаеля 
+    // ответы на посты пользовтаеля
     commentsOnUserPostsByUserId: Record<string, Comment[]>;
-    // ответы к комментариям пользовтаеля 
+    // ответы к комментариям пользовтаеля
     repliesToUserCommentsByUserId: Record<string, Comment[]>;
   };
 }
@@ -88,5 +82,5 @@ export type CommentAction =
       type: typeof SET_COMMENT_COUNTS;
       payload: { postId: string; count: number };
     }
-  | { type: typeof SET_EDIT_COMMENT; payload: UpdateCommentDTO }
+  | { type: typeof SET_EDIT_COMMENT; payload: Comment }
   | { type: typeof DELETE_COMMENT; payload: { id: string; postId: string } };

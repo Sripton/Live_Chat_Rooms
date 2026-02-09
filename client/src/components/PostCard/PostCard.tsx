@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Avatar,
   Box,
@@ -43,33 +43,42 @@ import { getComments } from "../../redux/actions/commentActions";
 import { useAppDispatch, useAppSelector } from "../../redux/store/hooks";
 
 // selector postReactions counts
-import { selectReactionCountsByPostId } from "../../redux/selectors/postReactionsSelectors";
+import { makeSelectReactionCountsByPostId } from "../../redux/selectors/postReactionsSelectors";
 
 import { useNavigate } from "react-router-dom";
 
 // Тип для PostCard пропсов
 type PostCardProps = {
-  handleOpenPostModal: (post: any) => void;
+  handleOpenPostModal: (post: Post | null) => void;
+  replyToPostId: string | null;
+  setReplyToPostId: (value: string | null) => void;
   isMobile: boolean;
   post: Post;
   index: number;
   COLORS: any;
   userId: string | null;
+  toggleFocus: (postId: string) => void;
+  setIsPostModalOpen: (value: boolean) => void; // ожидаем функцию для изменения состояния, а не само состояние.
 };
 
 const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
   (
-    { handleOpenPostModal, isMobile, post, index, COLORS, userId },
+    {
+      handleOpenPostModal,
+      replyToPostId,
+      setReplyToPostId,
+      isMobile,
+      post,
+      index,
+      COLORS,
+      userId,
+      toggleFocus,
+      setIsPostModalOpen,
+    },
     ref, // ref  - <Grow> (как и Slide, Collapse, Zoom) вешает ref на своего ребёнка, чтобы мерить размеры/делать reflow.
   ) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-
-    // состояние для создания/изменения комментария
-    const [editComment, setEditComment] = useState<Comment | null>(null);
-
-    // состояние для отображения формы ответа на посты/комментарии
-    const [replyOpen, setReplyOpen] = useState(false);
 
     // состояние для отображения комментариeв
     const [showComments, setShowComments] = useState<string | null>(null);
@@ -95,7 +104,21 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
       if (type === "comment") setExpandedComment(toggle);
     };
 
-    // для состояния
+    // функция для  открытия формы создания комментария к посту
+    const handleReplyToPost = (postId: string | null) => {
+      // если пользоаватель не зарегистрирвоан
+      if (!userId) {
+        navigate("/signin");
+        return;
+      }
+      //  меняем состояние  reply при нажатии на кнопку "ответить" под постом
+      setReplyToPostId((prev) => (prev === postId ? null : postId));
+
+      // если была открыта форма для создания поста, закрываем ее
+      setIsPostModalOpen(false);
+    };
+
+    // для состояния разворачивания/сворачивания текста поста
     const isExpandedPost = expandedPost.has(post.id);
 
     // данные из redux store
@@ -106,24 +129,20 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
     // Комментарии
     const comments = byPostId[post.id] ?? [];
 
-    // функция для  открытия формы создания комментария к посту
-    const handleReplyToPost = (postId: any) => {
-      // если пользоаватель не зарегистрирвоан
-      if (!userId) {
-        navigate("/signin");
-        return;
-      }
-      //  меняем состояние  reply
-      setReplyOpen((prev) => (prev === postId ? null : postId));
-
-      // если была открыта форма для создания поста, закрываем ее
-      // setIsPostModalOpen(false);
-    };
+    // количество реакций под каждым постом
+    // Проблема - каждый раз рендерится хотя данные те же  при открытии комнаты
+    // const counts = useAppSelector(
+    //   (state) => selectReactionCountsByPostId(state, post.id), // селектор вызывается много раз
+    // );
 
     // количество реакций под каждым постом
-    const counts = useAppSelector((state) =>
-      selectReactionCountsByPostId(state, post.id),
+    const selectCounts = useMemo(
+      () =>
+        // useMemo вызывает 1 раз при маунте PostCard
+        makeSelectReactionCountsByPostId(), // функция, которая создаёт селектор
+      [],
     );
+    const counts = useAppSelector((state) => selectCounts(state, post.id)); //  один и тот же селектор,  для конкретного PostCard
 
     // Анимация появления элементов
     const styleAnimation = (index: number) => ({
@@ -142,7 +161,12 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
 
     // функция переключатель открыть/закрыть комментарии
     const toggleComments = (postId: string) => {
-      setShowComments((prev) => (prev === postId ? null : postId));
+      // проверяем текущее состояние showComments
+      setShowComments((prev) => {
+        // null  !== postId -> next = postId
+        const next = prev === postId ? null : postId;
+        return next;
+      });
     };
 
     // Рендер всех реакций каждого поста по id при закгрузке страницы
@@ -155,9 +179,7 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
       dispatch(getComments(post.id)); // диспатчим все комментарии поста
     }, [dispatch, post.id]); // зависимости
 
-    console.log("post", post.postTitle.length);
-
-    console.log("COLORS", COLORS);
+    console.log("post", post);
 
     return (
       <Paper
@@ -354,7 +376,10 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
           {/* Комментарии */}
           <Button
             size="small"
-            onClick={() => toggleComments(post.id)}
+            onClick={() => {
+              toggleComments(post.id); // раскрытиые коммнетриев
+              toggleFocus(post.id); // отображение только одного поста с коммнетриями
+            }}
             startIcon={<CommentIcon />}
             sx={{
               color: COLORS.textMuted,
@@ -380,7 +405,10 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
           <Button
             size="small"
             startIcon={<ReplyIcon />}
-            onClick={() => handleReplyToPost(post.id)}
+            onClick={() => {
+              handleReplyToPost(post.id);
+              setIsPostModalOpen(false);
+            }}
             sx={{
               color: COLORS.accentColor,
               minWidth: "auto",
@@ -442,13 +470,12 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
         </Box>
 
         {/* Форма ответа для комментариев оставляемых к постам */}
-        {replyOpen && (
+        {replyToPostId === post.id && (
           <Box sx={{ mt: 2 }}>
             <CommentEditor
               postId={post.id}
-              editComment={editComment}
               parentId={null}
-              onCancel={() => setReplyOpen(false)}
+              onCancel={() => setReplyToPostId(null)}
             />
           </Box>
         )}
@@ -466,6 +493,8 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
               comments={comments}
               expandedComment={expandedComment}
               toggleExpanded={toggleExpanded}
+              post={post}
+              userId={userId}
             />
           </Box>
         )}

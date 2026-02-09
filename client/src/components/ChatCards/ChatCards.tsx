@@ -61,7 +61,7 @@ import { fetchPosts } from "../../redux/actions/postActions";
 import { CLEAR_ROOM_POSTS } from "../../redux/types/postTypes";
 import type { Post } from "../../redux/types/postTypes";
 
-import PostEditor from "../PostEditor/PostEditor";
+import PostEditor from "../PostEditor";
 import PostCard from "../PostCard";
 
 export default function ChatCards() {
@@ -70,14 +70,15 @@ export default function ChatCards() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  console.log("isMobile", isMobile);
-  console.log(typeof isMobile);
 
-  //состояние для открытия форма для создания поста
+  //состояние для открытия формы для создания поста
   const [isPostModalOpen, setIsPostModalOpen] = useState<boolean>(false);
 
   // состояние для создания/изменения поста
   const [postEditor, setPostEditor] = useState<Post | null>(null);
+
+  // состояние для открытия формы ответа на посты/комментарии
+  const [replyToPostId, setReplyToPostId] = useState<string | null>(null);
 
   // ------------------ Store ------------------
   // Забираем из store  комнату текущую комнату
@@ -85,6 +86,12 @@ export default function ChatCards() {
 
   // Забираем из store данные user
   const { userId } = useAppSelector((store) => store.user);
+
+  // ------------------- Posts ----------------------
+  // режим фокуса на одном посте. когда жмёшь «Комментарии» у поста,
+  // на странице остаётся только этот пост + его комментарии, а остальные посты скрываются.
+  // Повторное нажатие — возвращает список всех постов.
+  const [focusedPostId, setFocusedPostId] = useState<string | null>(null);
 
   // Забираем все поты из store
   const { posts } = useAppSelector((store) => store.post);
@@ -107,11 +114,17 @@ export default function ChatCards() {
     // переключаем postEditor edit/create
     setPostEditor(post || null);
 
-    //котрываем форму для создания поста
+    //открываем форму для создания поста
     setIsPostModalOpen(true);
   };
 
-  console.log("userId", userId);
+  const toggleFocus = (postId: string) => {
+    setFocusedPostId((prev) => (prev === postId ? null : postId));
+  };
+
+  const visiblePosts = focusedPostId
+    ? posts.filter((post) => post.id === focusedPostId)
+    : posts;
 
   return (
     <Box
@@ -240,13 +253,25 @@ export default function ChatCards() {
         {isPostModalOpen && (
           <Slide in={isPostModalOpen} direction="up" timeout={300}>
             <Box sx={{ mb: 3 }}>
-              <PostEditor
-                setIsPostModalOpen={setIsPostModalOpen}
-                mode={postEditor ? "edit" : "create"} // пропс для переклдчения создать/изменить пост
-                postEditor={postEditor} //  изменение поста
-                roomId={String(id)} // id текущей комнаты
-                onCancel={() => setIsPostModalOpen(false)} // закрытие формы
-              />
+              {postEditor ? (
+                // Если меняем пост
+                <PostEditor
+                  setIsPostModalOpen={setIsPostModalOpen}
+                  mode={"edit"} // пропс для переклдчения создать/изменить пост
+                  postEditor={postEditor} //  изменение поста
+                  roomId={String(id)} // id текущей комнаты
+                  onCancel={() => setIsPostModalOpen(false)} // закрытие формы
+                />
+              ) : (
+                // Если создаем пост
+                <PostEditor
+                  setIsPostModalOpen={setIsPostModalOpen}
+                  mode={"create"} // пропс для переклдчения создать/изменить пост
+                  postEditor={null} //  создание поста
+                  roomId={String(id)} // id текущей комнаты
+                  onCancel={() => setIsPostModalOpen(false)} // закрытие формы
+                />
+              )}
             </Box>
           </Slide>
         )}
@@ -268,18 +293,22 @@ export default function ChatCards() {
           >
             <AnimatePresence>
               <Stack spacing={2}>
-                {posts.map((post, index) => {
+                {visiblePosts.map((post, index) => {
                   return (
                     <Grow in={true} timeout={index * 100} key={post.id}>
                       {/* Grow вешает  ref на свой дочерний элемент. 
                       PostCard - дочерний жлемент. Не MUI компонент, нужен ref */}
                       <PostCard
                         handleOpenPostModal={handleOpenPostModal}
+                        replyToPostId={replyToPostId}
+                        setReplyToPostId={setReplyToPostId}
                         isMobile={isMobile}
                         post={post}
                         index={index}
                         COLORS={COLORS}
                         userId={userId}
+                        toggleFocus={toggleFocus}
+                        setIsPostModalOpen={setIsPostModalOpen}
                       />
                     </Grow>
                   );

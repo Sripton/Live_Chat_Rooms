@@ -4,21 +4,31 @@ import { Comment } from "@prisma/client";
 
 const router = express.Router();
 
-// тип ID
-type ParamsId = {
+// тип postID
+type ParamsPostId = {
   postId: string;
 };
 
-// тип ID
-type ParamsBody = {
+// тип запроса для создания комментария
+type ParamsBodyCreate = {
   commentTitle: string;
   parentId?: string | null;
 };
 
+// тип запроса для изменения комментария
+type ParamsBodyEdit = {
+  commentTitle: string;
+};
+
+// тип commentID
+type ParamsCommentId = {
+  commentId: string;
+};
+
 // Маршрут API для создания комментария
 router.post(`/:postId`, async (req: express.Request, res: express.Response) => {
-  const { postId } = req.params as ParamsId;
-  const { commentTitle, parentId } = req.body as ParamsBody;
+  const { postId } = req.params as ParamsPostId;
+  const { commentTitle, parentId } = req.body as ParamsBodyCreate;
   try {
     // Забираем сессию пользователя
     const userId = req.session.userId;
@@ -89,7 +99,7 @@ router.post(`/:postId`, async (req: express.Request, res: express.Response) => {
 
 // Маршрут API для передачи комментариев на клиент
 router.get("/:postId", async (req: express.Request, res: express.Response) => {
-  const { postId } = req.params as ParamsId;
+  const { postId } = req.params as ParamsPostId;
   try {
     const comments = await prisma.comment.findMany({
       where: { postId },
@@ -108,5 +118,33 @@ router.get("/:postId", async (req: express.Request, res: express.Response) => {
     res.status(404).json({ message: "Сервер ответил с ошибкой" });
   }
 });
+
+router.patch(
+  "/:commentId",
+  async (req: express.Request, res: express.Response) => {
+    const { commentId } = req.params as ParamsCommentId;
+    const { commentTitle } = req.body as ParamsBodyEdit;
+    try {
+      //  ищем сам комментарий по id
+      const comment = await prisma.comment.findUnique({
+        where: { id: commentId },
+      });
+
+      if (!comment)
+        return res.status(404).json({ message: "Коммнетрий не обнаружен" });
+
+      // Обновляем комментарий
+      const updatedComment = await prisma.comment.update({
+        where: { id: comment.id },
+        data: { commentTitle },
+      });
+
+      // отдаем обновленный комментарий на клиент
+      return res.status(200).json(updatedComment);
+    } catch (error) {
+      console.log(error);
+    }
+  },
+);
 
 export default router;

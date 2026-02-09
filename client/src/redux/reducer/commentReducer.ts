@@ -30,7 +30,7 @@ export default function commentReducer(
         ...state, //  возвразаем текущий state
         byPostId: {
           // по ключу byPostId
-          ...state.byPostId, // вохвращаем все поля
+          ...state.byPostId, // возвращаем все поля
           [postId]: [...prevList, comment], // по ключу [postId]: [...сохраняем старые поля, добавялем новый сomment]
         },
         countsByPostId: { ...state.countsByPostId, [postId]: nextList.length },
@@ -46,6 +46,21 @@ export default function commentReducer(
           ...state.countsByPostId,
           [postId]: Array.isArray(comments) ? comments.length : 0,
         },
+      };
+    }
+
+    case SET_EDIT_COMMENT: {
+      const updated = action.payload;
+      const list = state.byPostId[updated.postId] ?? [];
+      const updatedList = list.map((comment) =>
+        comment.id === updated.id
+          ? { ...comment, commentTitle: updated.commentTitle }
+          : comment,
+      );
+
+      return {
+        ...state,
+        byPostId: { ...state.byPostId, [updated.postId]: updatedList },
       };
     }
 
