@@ -19,9 +19,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 // postTypes
 import type { Post } from "../../redux/types/postTypes";
 
-// commentTypes
-import type { Comment } from "../../redux/types/commentTypes";
-
 import { deletepost } from "../../redux/actions/postActions";
 
 // компонент для открытия формы для создания/изменения комментриев
@@ -51,7 +48,8 @@ import { useNavigate } from "react-router-dom";
 type PostCardProps = {
   handleOpenPostModal: (post: Post | null) => void;
   replyToPostId: string | null;
-  setReplyToPostId: (value: string | null) => void;
+  // setReplyToPostId: (value: string | null) => void; (функция принимает string | null) (функция ничего не возвращает)
+  setReplyToPostId: React.Dispatch<React.SetStateAction<string | null>>;
   isMobile: boolean;
   post: Post;
   index: number;
@@ -112,6 +110,7 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
         return;
       }
       //  меняем состояние  reply при нажатии на кнопку "ответить" под постом
+      // обязательнго нужно использовтаь SetState
       setReplyToPostId((prev) => (prev === postId ? null : postId));
 
       // если была открыта форма для создания поста, закрываем ее

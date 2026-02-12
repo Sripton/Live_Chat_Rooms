@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Avatar,
   Button,
@@ -123,6 +123,12 @@ export default function CommentsCard({
   // древовидная структура комментариев
   const tree = buildTreeComments(comments);
 
+  const commentMap = useMemo(() => {
+    const map = new Map<string, Comment>();
+    for (const comment of comments) map.set(comment.id, comment);
+    return map;
+  }, [comments]);
+
   return (
     <Box sx={{ p: 1 }}>
       {isEmpty ? (
@@ -158,6 +164,7 @@ export default function CommentsCard({
               openEdit={openEdit}
               closeEditor={closeEditor}
               deleteCommentActions={deleteCommentActions}
+              commentMap={commentMap}
             />
           ))}
         </Stack>

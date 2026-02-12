@@ -16,18 +16,18 @@ import { useAppDispatch } from "../../redux/store/hooks";
 // тип для пропсов CommentEditor
 type CommentEditorProps = {
   postId: string;
-  editComment: Comment | null;
+  editComment?: Comment | null; //  необязательный (чтобы в компоненте PostCard не ругался)
   parentId: string | null;
   onCancel: () => void;
 };
 export default function CommentEditor({
   postId,
-  editComment,
+  editComment = null, // default
   parentId,
   onCancel,
 }: CommentEditorProps) {
   const dispatch = useAppDispatch();
-  console.log("editComment", editComment);
+
   return (
     <BaseEditor
       initialValues={editComment?.commentTitle ?? ""}

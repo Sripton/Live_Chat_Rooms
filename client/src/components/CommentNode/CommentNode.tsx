@@ -65,6 +65,7 @@ type CommentNodeProps = {
   openEdit: (comment: Comment) => void;
   closeEditor: () => void;
   deleteCommentActions: (postId: string, commentId: string) => void;
+  commentMap: Map<string, Comment>;
 };
 export default function CommentNode({
   comment,
@@ -78,28 +79,32 @@ export default function CommentNode({
   openEdit,
   closeEditor,
   deleteCommentActions,
+  commentMap,
 }: CommentNodeProps) {
-  console.log(comment);
   const avatarUrl = comment?.user?.avatar; //  аватар пользователя
   const name = comment?.user?.username; // имя пользователя  написавшего комментарий
   const dataCreate = new Date(comment?.createdAt).toLocaleDateString(); // дата и время создания
   const isExpandedComment = expandedComment.has(comment.id); // развернуть/свернуть комментарий
   const isPostAuthor = post?.user?.username || "Пользователь"; // автор поста
   const isCommentAuthor = comment?.user?.username || "Пользователь"; // автор коммнетрия
-  const isCommentParentAuthor =
-    comment?.replies?.[0]?.user?.username || "удаленного комментария"; // коммнетрий на который отвечают
+  const isParentComment = comment?.parentId
+    ? commentMap.get(comment?.parentId)?.user?.username
+    : null; // на какой коммнетрий ответили
 
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 1.25,
-        p: 1.5,
+        gap: 0.75,
+        p: 1.25,
+        width: "100%",
+        maxWidth: 760,
+        alignSelf: "flex-start",
         borderRadius: "16px",
-        background: "rgba(35, 20, 51, 0.7)",
+        background: "rgba(35, 20, 51, 0.55)",
         backdropFilter: "blur(10px)",
-        border: `1px solid ${COLORS.borderColor}`,
+        border: `1px solid rgba(183,148,244,0.18)`,
         position: "relative",
         overflow: "hidden",
         "&::before": {
@@ -322,7 +327,7 @@ export default function CommentNode({
                 "&:hover": { color: COLORS.accentColor },
               }}
             >
-              {`${isCommentAuthor} ответил ${isCommentParentAuthor}`}
+              {`${isCommentAuthor} ответил ${isParentComment}`}
             </Typography>
           )}
 
@@ -432,6 +437,7 @@ export default function CommentNode({
               openEdit={openEdit}
               closeEditor={closeEditor}
               deleteCommentActions={deleteCommentActions}
+              commentMap={commentMap}
             />
           ))}
         </Stack>
