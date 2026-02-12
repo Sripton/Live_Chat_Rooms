@@ -102,7 +102,9 @@ router.get("/:postId", async (req: express.Request, res: express.Response) => {
   const { postId } = req.params as ParamsPostId;
   try {
     const comments = await prisma.comment.findMany({
+      // ищем все комментарии к посту по postId
       where: { postId },
+      orderBy: { createdAt: "asc" },
       include: {
         user: {
           select: {
@@ -119,6 +121,7 @@ router.get("/:postId", async (req: express.Request, res: express.Response) => {
   }
 });
 
+// Мрашрут для изменения комментария
 router.patch(
   "/:commentId",
   async (req: express.Request, res: express.Response) => {
@@ -141,6 +144,23 @@ router.patch(
 
       // отдаем обновленный комментарий на клиент
       return res.status(200).json(updatedComment);
+    } catch (error) {
+      console.log(error);
+    }
+  },
+);
+
+// Мрашрут для удаления комментария
+router.delete(
+  "/:commentId",
+  async (req: express.Request, res: express.Response) => {
+    const { commentId } = req.params as ParamsCommentId;
+    try {
+      // удаляем комментарий по его id
+      await prisma.comment.delete({
+        where: { id: commentId },
+      });
+      return res.status(200).json({ commentId });
     } catch (error) {
       console.log(error);
     }

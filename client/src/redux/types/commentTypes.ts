@@ -83,4 +83,7 @@ export type CommentAction =
       payload: { postId: string; count: number };
     }
   | { type: typeof SET_EDIT_COMMENT; payload: Comment }
-  | { type: typeof DELETE_COMMENT; payload: { id: string; postId: string } };
+  | {
+      type: typeof DELETE_COMMENT;
+      payload: { postId: string; commentId: string };
+    };

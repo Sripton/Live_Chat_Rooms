@@ -57,6 +57,8 @@ async function main() {
   app.use(session(sessionConfig));
   app.use(passport.initialize());
 
+  console.log("DATABASE_URL:", process.env.DATABASE_URL);
+
   app.use("/auth", authAPIRouter);
   app.use("/api/users", userAPIRouter);
   app.use("/api/rooms", roomAPIRouter);

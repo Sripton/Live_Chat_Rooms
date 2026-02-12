@@ -179,8 +179,6 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
       dispatch(getComments(post.id)); // диспатчим все комментарии поста
     }, [dispatch, post.id]); // зависимости
 
-    console.log("post", post);
-
     return (
       <Paper
         ref={ref}

@@ -64,6 +64,18 @@ export default function commentReducer(
       };
     }
 
+    case DELETE_COMMENT: {
+      const { postId, commentId } = action.payload;
+
+      const list = state.byPostId[postId] ?? [];
+      const newList = list.filter((comment) => comment.id !== commentId);
+      return {
+        ...state,
+        byPostId: { ...state.byPostId, [postId]: newList },
+        countsByPostId: { ...state.countsByPostId, [postId]: newList.length },
+      };
+    }
+
     default:
       return state;
   }
