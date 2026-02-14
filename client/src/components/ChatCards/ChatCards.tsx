@@ -111,17 +111,26 @@ export default function ChatCards() {
       navigate("/signin");
       return;
     }
+
     // переключаем postEditor edit/create
     setPostEditor(post || null);
 
     //открываем форму для создания поста
     setIsPostModalOpen(true);
+
+    // сбрасываем состояние добавления комментариев к постам
+    setReplyToPostId(null);
+
+    // сбрасываем режим фокуса
+    setFocusedPostId(null);
   };
 
+  // Функция  для фокусирования на одном посте и спратять другие посты
   const toggleFocus = (postId: string) => {
     setFocusedPostId((prev) => (prev === postId ? null : postId));
   };
 
+  // переменная состояния для отображения только фокусированного  поста
   const visiblePosts = focusedPostId
     ? posts.filter((post) => post.id === focusedPostId)
     : posts;
@@ -250,7 +259,7 @@ export default function ChatCards() {
           </Paper>
         </Slide>
 
-        {isPostModalOpen && (
+        {isPostModalOpen ? (
           <Slide in={isPostModalOpen} direction="up" timeout={300}>
             <Box sx={{ mb: 3 }}>
               {postEditor ? (
@@ -274,68 +283,70 @@ export default function ChatCards() {
               )}
             </Box>
           </Slide>
-        )}
-        <Divider
-          sx={{
-            border: "1px solid rgba(255,255,255,0.05)",
-            mb: 3,
-            opacity: 0.3,
-          }}
-        />
-
-        {/* Список постов */}
-        {Array.isArray(posts) && posts.length > 0 ? (
-          <Box
-            component={motion.div}
-            variants={containerVariants} // применяем варианты контейнера
-            initial="hidden" // начальное состояние
-            animate="visible" // конечное состояние
-          >
-            <AnimatePresence>
-              <Stack spacing={2}>
-                {visiblePosts.map((post, index) => {
-                  return (
-                    <Grow in={true} timeout={index * 100} key={post.id}>
-                      {/* Grow вешает  ref на свой дочерний элемент. 
-                      PostCard - дочерний жлемент. Не MUI компонент, нужен ref */}
-                      <PostCard
-                        handleOpenPostModal={handleOpenPostModal}
-                        replyToPostId={replyToPostId}
-                        setReplyToPostId={setReplyToPostId}
-                        isMobile={isMobile}
-                        post={post}
-                        index={index}
-                        COLORS={COLORS}
-                        userId={userId}
-                        toggleFocus={toggleFocus}
-                        setIsPostModalOpen={setIsPostModalOpen}
-                      />
-                    </Grow>
-                  );
-                })}
-              </Stack>
-            </AnimatePresence>
-          </Box>
         ) : (
-          <Zoom in={true} timeout={500}>
-            <Box
+          <>
+            <Divider
               sx={{
-                textAlign: "center",
-                py: 8,
-                color: COLORS.textMuted,
+                border: "1px solid rgba(255,255,255,0.05)",
+                mb: 3,
+                opacity: 0.3,
               }}
-            >
-              <Typography
-                variant="body1"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: isMobile ? "0.95rem" : "1rem",
-                }}
+            />
+            {/* Список постов */}
+            {Array.isArray(posts) && posts.length > 0 ? (
+              <Box
+                component={motion.div}
+                variants={containerVariants} // применяем варианты контейнера
+                initial="hidden" // начальное состояние
+                animate="visible" // конечное состояние
               >
-                Пока нет постов. Будьте первым!
-              </Typography>
-            </Box>
-          </Zoom>
+                <AnimatePresence>
+                  <Stack spacing={2}>
+                    {visiblePosts.map((post, index) => {
+                      return (
+                        <Grow in={true} timeout={index * 100} key={post.id}>
+                          {/* Grow вешает  ref на свой дочерний элемент. 
+                      PostCard - дочерний жлемент. Не MUI компонент, нужен ref */}
+                          <PostCard
+                            handleOpenPostModal={handleOpenPostModal}
+                            replyToPostId={replyToPostId}
+                            setReplyToPostId={setReplyToPostId}
+                            isMobile={isMobile}
+                            post={post}
+                            index={index}
+                            COLORS={COLORS}
+                            userId={userId}
+                            toggleFocus={toggleFocus}
+                            setIsPostModalOpen={setIsPostModalOpen}
+                          />
+                        </Grow>
+                      );
+                    })}
+                  </Stack>
+                </AnimatePresence>
+              </Box>
+            ) : (
+              <Zoom in={true} timeout={500}>
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    py: 8,
+                    color: COLORS.textMuted,
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: isMobile ? "0.95rem" : "1rem",
+                    }}
+                  >
+                    Пока нет постов. Будьте первым!
+                  </Typography>
+                </Box>
+              </Zoom>
+            )}
+          </>
         )}
       </Box>
     </Box>

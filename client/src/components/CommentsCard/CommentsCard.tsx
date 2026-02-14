@@ -1,14 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  Avatar,
-  Button,
-  Divider,
-  IconButton,
-  Tooltip,
-  Typography,
-  Box,
-  Stack,
-} from "@mui/material";
+import { Divider, Typography, Box, Stack } from "@mui/material";
 
 // redux commenttypes
 import type { Comment } from "../../redux/types/commentTypes";
@@ -16,10 +7,10 @@ import type { Comment } from "../../redux/types/commentTypes";
 // redux posttypes
 import type { Post } from "../../redux/types/postTypes";
 
-// компонент CommentEditor  для кнопок  ответить/редактировать комментарии
+// Компонент CommentEditor для отображения формы создания/изменения комментария
 import CommentEditor from "../CommentEditor";
 
-// компонент CommentNodeProps  для рекурсивного отображения комментариев
+// компонент CommentNode  для рекурсивного отображения комментариев
 import CommentNode from "../CommentNode";
 
 // функция удаления комментария (redux actions)
@@ -123,12 +114,32 @@ export default function CommentsCard({
   // древовидная структура комментариев
   const tree = buildTreeComments(comments);
 
+  // Для вычсиления рордителя комментария. Для UI понять на какой комментарий был дан ответ
   const commentMap = useMemo(() => {
     const map = new Map<string, Comment>();
     for (const comment of comments) map.set(comment.id, comment);
     return map;
   }, [comments]);
 
+  // ------------------------ Рендер CommentEditor ---------------------
+  // если открыт editor — скрываем все комментарии и показываем только форму
+  if (editor) {
+    return (
+      <Box sx={{ p: 1 }}>
+        <Box sx={{ mt: 1.5 }}>
+          <CommentEditor
+            postId={post.id}
+            editComment={editor.mode === "edit" ? editor.editComment : null}
+            parentId={editor.mode === "create" ? editor.parentId : null}
+            onCancel={closeEditor}
+          />
+        </Box>
+      </Box>
+    );
+  }
+
+  // ------------------------ Рендер Списка комментариев ---------------------
+  // иначе — обычный рендер списка
   return (
     <Box sx={{ p: 1 }}>
       {isEmpty ? (

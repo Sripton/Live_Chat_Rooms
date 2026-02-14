@@ -26,9 +26,6 @@ import type { Post } from "../../redux/types/postTypes";
 // redux hooks
 import type { useAppDispatch } from "../../redux/store/hooks";
 
-// Компонент CokmentEditor для отображения формы создания/изменения комментария
-import CommentEditor from "../CommentEditor";
-
 // данные для backend
 type EditorState = {
   mode: "create" | "edit";
@@ -207,7 +204,6 @@ export default function CommentNode({
             </Typography>
           )}
         </Box>
-
         {/* Текст комментария (всегда под шапкой) */}
         <Typography
           sx={{
@@ -252,7 +248,6 @@ export default function CommentNode({
             );
           })()}
         </Typography>
-
         {/* Реакции (всегда снизу) */}
         <Box
           sx={{
@@ -408,18 +403,8 @@ export default function CommentNode({
             </Box>
           )}
         </Box>
-        {/* editor */}
-        <Box sx={{ mt: 1.5 }}>
-          {editor?.anchorCommentId === comment.id && (
-            <CommentEditor
-              postId={post.id}
-              editComment={editor.mode === "edit" ? editor.editComment : null}
-              parentId={editor.mode === "create" ? editor.parentId : null}
-              onCancel={closeEditor}
-            />
-          )}
-        </Box>
       </Box>
+
       {/*  РЕКУРСИВНО рендерим ответы */}
       {comment.replies?.length ? (
         <Stack>
