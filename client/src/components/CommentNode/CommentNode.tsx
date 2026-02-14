@@ -26,6 +26,9 @@ import type { Post } from "../../redux/types/postTypes";
 // redux hooks
 import type { useAppDispatch } from "../../redux/store/hooks";
 
+// redux createComment actions
+import { createCommentReaction } from "../../redux/actions/commentReactionActions";
+
 // данные для backend
 type EditorState = {
   mode: "create" | "edit";
@@ -264,6 +267,8 @@ export default function CommentNode({
           <Button
             size="small"
             startIcon={<ThumbUpIcon />}
+            // создаем like
+            onClick={() => dispatch(createCommentReaction(comment.id, "LIKE"))}
             sx={{
               color: COLORS.textSecondary,
               minWidth: "auto",
@@ -288,6 +293,8 @@ export default function CommentNode({
           <Button
             size="small"
             startIcon={<ThumbDownIcon />}
+            // создаем dislike
+            onClick={() => dispatch(createCommentReaction(comment.id, "DISLIKE"))}
             sx={{
               color: COLORS.textSecondary,
               minWidth: "auto",

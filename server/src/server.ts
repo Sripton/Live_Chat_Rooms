@@ -14,6 +14,7 @@ import roomRequestAPIRouter from "./API/roomRequest/roomRequestAPIRouter";
 import postAPIRouter from "./API/post/postAPIRouter";
 import postReactionsAPIRouter from "./API/postReaction/postAPIReaction";
 import commentAPIRouter from "./API/comment/commentAPIRouter";
+import commentReactionsAPIRouter from "./API/comentReaction/commentAPIReaction";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -57,8 +58,6 @@ async function main() {
   app.use(session(sessionConfig));
   app.use(passport.initialize());
 
-  console.log("DATABASE_URL:", process.env.DATABASE_URL);
-
   app.use("/auth", authAPIRouter);
   app.use("/api/users", userAPIRouter);
   app.use("/api/rooms", roomAPIRouter);
@@ -66,6 +65,7 @@ async function main() {
   app.use("/api/posts", postAPIRouter);
   app.use(`/api/post_reactions`, postReactionsAPIRouter);
   app.use("/api/comments", commentAPIRouter);
+  app.use("/api/comment_reactions", commentReactionsAPIRouter);
 
   app.listen(PORT, () => console.log(`Server started on ${PORT} PORT`));
 }

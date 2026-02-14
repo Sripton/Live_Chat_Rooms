@@ -89,6 +89,9 @@ export default function CommentsCard({
   // Закрытие формы
   const closeEditor = () => setEditor(null);
 
+  console.log("editor", editor);
+  console.log("comments", comments);
+
   // функуция для древовидного хранения коммнетриев
   function buildTreeComments(comments: Comment[]): CommentTree[] {
     const map = new Map<string, CommentTree>();
