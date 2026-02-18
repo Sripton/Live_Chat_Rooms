@@ -22,6 +22,9 @@ import postReactionReducer from "../reducer/postReactionReducer";
 // Импорт редьюсера, который обрабатывает действия, связанные с реакциями на посты
 import commentReducer from "../reducer/commentReducer";
 
+// Импорт редьюсера, который обрабатывает действия, связанные с реакциями на комментарии
+import commentReactionReducer from "../reducer/commentReactionReducer";
+
 // Экспорт конфигурированного хранилища (store)
 export const store = configureStore({
   // Объект всех редьюсеров приложения
@@ -33,6 +36,7 @@ export const store = configureStore({
     post: postReducer,
     postReaction: postReactionReducer,
     comment: commentReducer,
+    commentReaction: commentReactionReducer,
   },
 });
 

@@ -42,38 +42,65 @@ router.post(
           .json({ message: "Комментарий не найден" });
       }
 
-      // Проверка, оставлял ли пользователь уже реакцию на этот пост
-      const existingReaction = await prisma.commentReaction.findUnique({
-        where: {
-          userId_commentId: {
-            userId: userId,
-            commentId: commentId,
-          },
-        },
-      });
+      // // Проверка, оставлял ли пользователь уже реакцию на этот пост
+      // const existingReaction = await prisma.commentReaction.findUnique({
+      //   where: {
+      //     userId_commentId: {
+      //       userId: userId,
+      //       commentId: commentId,
+      //     },
+      //   },
+      // });
 
-      // // Если реакция уже существует, обновляем её
-      if (existingReaction) {
-        const updated = await prisma.commentReaction.update({
-          where: { id: existingReaction.id },
-          data: { reactionType },
-        });
-        return res.status(200).json(updated);
-      }
+      // // // Если реакция уже существует, обновляем её
+      // if (existingReaction) {
+      //   const updated = await prisma.commentReaction.update({
+      //     where: { id: existingReaction.id },
+      //     data: { reactionType },
+      //   });
+      //   return res.status(200).json(updated);
+      // }
 
-      // Если реакции нет, создаем новую
-      const reaction = await prisma.commentReaction.create({
-        data: {
-          userId,
-          commentId: comment.id,
-          reactionType: reactionType,
-        },
+      // // Если реакции нет, создаем новую
+      // const reaction = await prisma.commentReaction.create({
+      //   data: {
+      //     userId,
+      //     commentId: comment.id,
+      //     reactionType: reactionType,
+      //   },
+      // });
+
+      // PUT/POST upsert делаем одним запросом
+      const reaction = await prisma.commentReaction.upsert({
+        where: { userId_commentId: { userId, commentId } },
+        update: { reactionType },
+        create: { userId, commentId, reactionType },
       });
 
       //  отправляем созданную реакцию на сервер
       return res.status(200).json(reaction);
     } catch (error) {
       console.log(error);
+    }
+  },
+);
+
+// Маршрут для передачи реакций на комментарии
+router.get(
+  "/:commentId",
+  async (req: express.Request, res: express.Response) => {
+    const { commentId } = req.params as ParamsCommentId;
+    try {
+      // ищем все реакции по id комментария
+      const reactions = await prisma.commentReaction.findMany({
+        where: { commentId },
+      });
+
+      // отправляем все на сервер
+      return res.status(200).json(reactions);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Ошибка сервера" });
     }
   },
 );

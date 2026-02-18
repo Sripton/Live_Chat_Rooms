@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Divider, Typography, Box, Stack } from "@mui/material";
 
 // redux commenttypes
@@ -16,7 +16,11 @@ import CommentNode from "../CommentNode";
 // функция удаления комментария (redux actions)
 import { deleteCommentActions } from "../../redux/actions/commentActions";
 
-import { useAppDispatch } from "../../redux/store/hooks";
+// redux hooks
+import { useAppDispatch, useAppSelector } from "../../redux/store/hooks";
+
+// redux commentReactionActions
+import { getCommentReaction } from "../../redux/actions/commentReactionActions";
 
 // Цветовая палитра в стиле PostCard / ChatCards
 const COLORS = {
@@ -63,6 +67,24 @@ export default function CommentsCard({
 
   const dispatch = useAppDispatch();
 
+  // Забираем все реакции из store
+  // byCommentId - меняется каждый раз, когда приходят реакции
+  // byCommentId - обновляется после каждого GET.
+  const byCommentId = useAppSelector(
+    (store) => store.commentReaction.byCommentId,
+  );
+
+  // рендер всех реакций
+  useEffect(() => {
+    for (const c of comments) {
+      const reaction = byCommentId[c.id];
+      // !reaction?.loaded - защита от лишних запросов и бесконечных повторных загрузок
+      if (!reaction?.loaded) {
+        dispatch(getCommentReaction(c.id, userId));
+      }
+    }
+  }, [dispatch, comments, byCommentId, userId]); // byCommentId
+
   // Состояние для ответа на коммнетрий/редактирования комментария
   const [editor, setEditor] = useState<EditorState | null>(null);
 
@@ -89,9 +111,6 @@ export default function CommentsCard({
   // Закрытие формы
   const closeEditor = () => setEditor(null);
 
-  console.log("editor", editor);
-  console.log("comments", comments);
-
   // функуция для древовидного хранения коммнетриев
   function buildTreeComments(comments: Comment[]): CommentTree[] {
     const map = new Map<string, CommentTree>();
@@ -114,10 +133,10 @@ export default function CommentsCard({
     return roots;
   }
 
-  // древовидная структура комментариев
+  // массив данных древовидной структуры комментариев
   const tree = buildTreeComments(comments);
 
-  // Для вычсиления рордителя комментария. Для UI понять на какой комментарий был дан ответ
+  // Для вычсиления родителя комментария. Для UI понять на какой комментарий был дан ответ
   const commentMap = useMemo(() => {
     const map = new Map<string, Comment>();
     for (const comment of comments) map.set(comment.id, comment);

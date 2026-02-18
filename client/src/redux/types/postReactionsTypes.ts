@@ -53,6 +53,7 @@ export interface ReactionState {
   byPostId: Record<string, string[]>; // postId -> массив reactionId
   entities: Record<string, Reaction | undefined>; // reactionId -> Reaction
   // isLoadingByPostId: Record<string, boolean>; на будушее если мне понадобится
+  myReactionByPostId: Record<string, ReactionType | null>;
   errorByPostId: Record<string, string | null>;
 }
 
@@ -62,4 +63,11 @@ export type ReactionActions =
       type: typeof SET_POST_REACTION_CREATE;
       payload: Reaction;
     }
-  | { type: typeof GET_POST_REACTION_LIST; payload: Reaction[] };
+  | {
+      type: typeof GET_POST_REACTION_LIST;
+      payload: {
+        postId: string;
+        userId: string;
+        reactions: Reaction[];
+      };
+    };

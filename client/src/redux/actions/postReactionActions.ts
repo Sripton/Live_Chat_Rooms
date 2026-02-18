@@ -26,12 +26,15 @@ export const createPostReaction =
 
 // экшен функция для загрузки всех  реакций
 export const getPostReactions =
-  (postId: string) => async (dispatch: AppDispatch) => {
+  (postId: string, userId: string) => async (dispatch: AppDispatch) => {
     try {
       const { data } = await axios.get<Reaction[]>(
         `/api/post_reactions/${postId}`,
       );
-      dispatch({ type: GET_POST_REACTION_LIST, payload: data });
+      dispatch({
+        type: GET_POST_REACTION_LIST,
+        payload: { postId, userId, reactions: data },
+      });
     } catch (error) {
       console.log("Ошибка при подгрузке реакций", error);
     }

@@ -54,7 +54,7 @@ type PostCardProps = {
   post: Post;
   index: number;
   COLORS: any;
-  userId: string | null;
+  userId: string;
   toggleFocus: (postId: string) => void;
   setIsPostModalOpen: (value: boolean) => void; // ожидаем функцию для изменения состояния, а не само состояние.
 };
@@ -141,7 +141,14 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
         makeSelectReactionCountsByPostId(), // функция, которая создаёт селектор
       [],
     );
+    // решение перерендера через selector
     const counts = useAppSelector((state) => selectCounts(state, post.id)); //  один и тот же селектор,  для конкретного PostCard
+
+    // для определения реакций пользователя
+    const { myReactionByPostId } = useAppSelector(
+      (store) => store.postReaction,
+    );
+    console.log("myReactionByPostId", myReactionByPostId[post.id]);
 
     // Анимация появления элементов
     const styleAnimation = (index: number) => ({
@@ -170,8 +177,8 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
 
     // Рендер всех реакций каждого поста по id при закгрузке страницы
     useEffect(() => {
-      dispatch(getPostReactions(post.id)); // диспатчим реакции на посты
-    }, [dispatch, post.id]); // зависимости
+      dispatch(getPostReactions(post.id, userId)); // диспатчим реакции на посты
+    }, [dispatch, post.id, userId]); // зависимости
 
     // Рендер всех коммнетриев каждого поста по id при закгрузке страницы
     useEffect(() => {
@@ -327,7 +334,11 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
             startIcon={<ThumbUpIcon />}
             onClick={() => dispatch(createPostReaction(post.id, "LIKE"))}
             sx={{
-              color: COLORS.textMuted,
+              // если стоит моя реакция то подсвечиваем красным
+              color:
+                myReactionByPostId[post.id] === "LIKE"
+                  ? COLORS.dangerColor
+                  : COLORS.textMuted,
               minWidth: "auto",
               px: 1.5,
               py: 0.5,
@@ -351,7 +362,11 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
             startIcon={<ThumbDownIcon />}
             onClick={() => dispatch(createPostReaction(post.id, "DISLIKE"))}
             sx={{
-              color: COLORS.textMuted,
+              // если стоит моя реакция то подсвечиваем красным
+              color:
+                myReactionByPostId[post.id] === "DISLIKE"
+                  ? COLORS.dangerColor
+                  : COLORS.textMuted,
               minWidth: "auto",
               px: 1.5,
               py: 0.5,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 // Material UI
 import {
   Avatar,
@@ -17,14 +17,17 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
 
-// redux commentTypes
-import type { Comment } from "../../redux/types/commentTypes";
-
 // redux postTypes
 import type { Post } from "../../redux/types/postTypes";
 
+// redux commentTypes
+import type { Comment } from "../../redux/types/commentTypes";
+
 // redux hooks
-import type { useAppDispatch } from "../../redux/store/hooks";
+import { useAppSelector, type useAppDispatch } from "../../redux/store/hooks";
+
+// redux actions
+import { deleteCommentActions } from "../../redux/actions/commentActions";
 
 // redux createComment actions
 import { createCommentReaction } from "../../redux/actions/commentReactionActions";
@@ -64,7 +67,7 @@ type CommentNodeProps = {
   openReply: (comment: Comment) => void;
   openEdit: (comment: Comment) => void;
   closeEditor: () => void;
-  deleteCommentActions: (postId: string, commentId: string) => void;
+  deleteCommentActions: typeof deleteCommentActions;
   commentMap: Map<string, Comment>;
 };
 export default function CommentNode({
@@ -90,6 +93,20 @@ export default function CommentNode({
   const isParentComment = comment?.parentId
     ? commentMap.get(comment?.parentId)?.user?.username
     : null; // на какой коммнетрий ответили
+
+  // счётчики + подсветка для реакций
+  const reactions = useAppSelector(
+    (store) => store.commentReaction.byCommentId[comment.id],
+  );
+
+  // ко-во like
+  const likeCounts = reactions?.counts.like ?? 0;
+  // ко-во dislike
+  const dislikeCounts = reactions?.counts.dislike ?? 0;
+  // мои реакции
+  const myReaction = reactions?.myReaction ?? null;
+
+  console.log("reactions", reactions);
 
   return (
     <Box
@@ -270,7 +287,11 @@ export default function CommentNode({
             // создаем like
             onClick={() => dispatch(createCommentReaction(comment.id, "LIKE"))}
             sx={{
-              color: COLORS.textSecondary,
+              // если стоит моя реакция то подсвечиваем красным
+              color:
+                myReaction === "LIKE"
+                  ? COLORS.dangerColor
+                  : COLORS.textSecondary,
               minWidth: "auto",
               px: 1.5,
               py: 0.5,
@@ -278,7 +299,6 @@ export default function CommentNode({
               borderRadius: "10px",
               textTransform: "none",
               fontFamily: "'Inter', sans-serif",
-              background: "rgba(255,255,255,0.02)",
               "&:hover": {
                 background: "rgba(183,148,244,0.1)",
                 color: COLORS.accentColor,
@@ -286,7 +306,7 @@ export default function CommentNode({
               "& .MuiButton-startIcon": { mr: 0.5 },
             }}
           >
-            0
+            {likeCounts}
           </Button>
 
           {/* dislike */}
@@ -294,9 +314,15 @@ export default function CommentNode({
             size="small"
             startIcon={<ThumbDownIcon />}
             // создаем dislike
-            onClick={() => dispatch(createCommentReaction(comment.id, "DISLIKE"))}
+            onClick={() =>
+              dispatch(createCommentReaction(comment.id, "DISLIKE"))
+            }
             sx={{
-              color: COLORS.textSecondary,
+              // если стоит моя реакция то подсвечиваем красным
+              color:
+                myReaction === "DISLIKE"
+                  ? COLORS.dangerColor
+                  : COLORS.textSecondary,
               minWidth: "auto",
               px: 1.5,
               py: 0.5,
@@ -304,7 +330,6 @@ export default function CommentNode({
               borderRadius: "10px",
               textTransform: "none",
               fontFamily: "'Inter', sans-serif",
-              background: "rgba(255,255,255,0.02)",
               "&:hover": {
                 background: "rgba(239,68,68,0.1)",
                 color: COLORS.dangerColor,
@@ -312,7 +337,7 @@ export default function CommentNode({
               "& .MuiButton-startIcon": { mr: 0.5 },
             }}
           >
-            0
+            {dislikeCounts}
           </Button>
 
           {/* описание какой пользователь написал/ответил на комментарий */}
@@ -393,7 +418,9 @@ export default function CommentNode({
               <Tooltip title="Удалить">
                 <IconButton
                   size="small"
-                  onClick={() => deleteCommentActions(post.id, comment.id)}
+                  onClick={() =>
+                    dispatch(deleteCommentActions(post.id, comment.id))
+                  }
                   sx={{
                     color: COLORS.dangerColor,
                     background: "rgba(239,68,68,0.1)",

@@ -15,32 +15,46 @@ export const GET_REACTION_COMMENT_LIST = "GET_REACTION_COMMENT_LIST";
 //   "updatedAt": "2026-02-14T12:08:31.273Z"
 // }
 
-// Тип реакции
+// Тип reactionType
 export type ReactionType = "LIKE" | "DISLIKE";
 
 // Тип реакции. форма одного объекта реакции
-export interface CommentReaction {
+export type CommentReaction = {
   id: string;
   userId: string;
   commentId: string;
   reactionType: ReactionType;
   createdAt: string;
   updatedAt: string;
-}
+};
 
-// то, что отправляем на сервер. объект передаваемый в API.
-export interface CreateReactionDTO {
-  reactionType: ReactionType;
-}
+// тип для счетчика реакций
+export type CommentRectionCounts = {
+  like: number;
+  dislike: number;
+};
 
+// тип для работы с реакциями
+export type CommetReactionDate = {
+  reactions: CommentReaction[]; // список реакций
+  counts: CommentRectionCounts; // счетчики
+  myReaction: ReactionType | null; // реакция текущего юзера на этот comment
+  loaded: boolean;
+};
+
+// state
 export interface CommentReactionState {
-  userId: string;
-  commentId: string;
-  reactionType: ReactionType | null;
-  allCommentReactions: CommentReaction[];
+  byCommentId: Record<string, CommetReactionDate>;
 }
 
 // Типы экшенов
-export type CommentReactions =
+export type CommentReactionActions =
   | { type: typeof SET_REACTION_COMMENT_CREATE; payload: CommentReaction }
-  | { type: typeof GET_REACTION_COMMENT_LIST; payload: CommentReaction[] };
+  | {
+      type: typeof GET_REACTION_COMMENT_LIST;
+      payload: {
+        commentId: string;
+        reactions: CommentReaction[];
+        userId?: string | null; //  для вычисления myReaction
+      };
+    };

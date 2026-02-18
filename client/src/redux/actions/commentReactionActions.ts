@@ -8,13 +8,14 @@ import axios from "axios";
 import type { AppDispatch } from "../store/store";
 
 // redux Reaction type
-import type { CommentReaction } from "../../redux/types/commentReactionTypes";
-
-export const fetch = () => {};
+import type {
+  ReactionType,
+  CommentReaction,
+} from "../../redux/types/commentReactionTypes";
 
 // экшен для создания реакции на комментарии
 export const createCommentReaction =
-  (commentId: string, reactionType: string) =>
+  (commentId: string, reactionType: ReactionType) =>
   async (dispatch: AppDispatch) => {
     try {
       const { data } = await axios.post<CommentReaction>(
@@ -22,6 +23,23 @@ export const createCommentReaction =
         { reactionType },
       );
       dispatch({ type: SET_REACTION_COMMENT_CREATE, payload: data });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+// экшен для получения реакций на комментарии
+export const getCommentReaction =
+  (commentId: string, userId: string | null) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      const { data } = await axios.get<CommentReaction[]>(
+        `/api/comment_reactions/${commentId}`,
+      );
+      dispatch({
+        type: GET_REACTION_COMMENT_LIST,
+        payload: { commentId, reactions: data, userId },
+      });
     } catch (error) {
       console.log(error);
     }
