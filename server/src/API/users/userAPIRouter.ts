@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
+import upload from "../../MiddleWare/uploadUser";
 const router = express.Router();
 
 router.post("/signup", async (req: express.Request, res: express.Response) => {
@@ -55,10 +56,11 @@ router.post("/signup", async (req: express.Request, res: express.Response) => {
 
     // id  после регистрации
     req.session.userId = user.id;
+
     return res.status(201).json({
       userId: user.id,
-      userName: user.username,
-      userAvatar: user.avatar,
+      username: user.username,
+      avatar: user.avatar,
     });
   } catch (error: any) {
     console.log(error);
@@ -118,8 +120,8 @@ router.post("/signin", async (req: express.Request, res: express.Response) => {
     // не хранить пароль/хэш на клиенте (это критично по безопасности)
     return res.json({
       userId: user.id,
-      userName: user.username,
-      userAvatar: user.avatar,
+      username: user.username,
+      avatar: user.avatar,
     });
   } catch (error) {
     console.log(error);
@@ -147,26 +149,28 @@ router.get(
         where: { id: userId },
         select: { id: true, username: true, avatar: true }, // select —  запрос к БД
       });
+
       // если в сессии id есть, но в БД пользователя нет
       if (!findUser) {
         req.session.destroy(() => {});
         return res.status(401).json({ message: "Пользователь не авторизован" });
       }
 
+      // лучше не хранить данные в в сессии.  Источник истины — база данных
       // обновляем данные в сессии
-      req.session.userName = findUser.username ?? undefined;
-      req.session.userAvatar = findUser.avatar;
+      // req.session.userName = findUser.username ?? undefined;
+      // req.session.userAvatar = findUser.avatar;
 
       return res.json({
         userId: findUser.id,
-        userName: findUser.username,
-        userAvatar: findUser.avatar,
+        username: findUser.username,
+        avatar: findUser.avatar,
       });
     } catch (error) {
       console.log(error);
       return res.status(500).json({ message: "Ошибка сервера" });
     }
-  }
+  },
 );
 
 router.get("/logout", (req: express.Request, res: express.Response) => {
@@ -185,4 +189,58 @@ router.get("/logout", (req: express.Request, res: express.Response) => {
     return res.status(500).json({ message: "Ошибка сервера" });
   }
 });
+
+// мрашрут для редактирвоания профиля пользователя
+router.patch(
+  `/uploadprofile`,
+  upload.single("avatar"),
+  async (req: express.Request, res: express.Response) => {
+    // забираем id пользователя из сессии
+    const userId = req.session.userId;
+
+    // если нет сессии
+    if (!userId) {
+      return res.status(401).json({ message: "Пользователь не авторизован" });
+    }
+
+    // данные имени пользовтеля
+    const { username } = req.body as { username: string };
+
+    // описываем  обновляемые поля профиля
+    // data содержит два необязательных поля: username, avatar
+    const data: { username?: string | null; avatar?: string | null } = {};
+
+    // обновлять имя только в том случае, если нам передали строку
+    if (typeof username === "string") {
+      const trimmed = username.trim(); // убираем лишние пробелы
+
+      // если после удаления пробелов строка не пустая, присваиваем её полю username в объекте data
+      if (trimmed.length > 0) data.username = trimmed;
+    }
+
+    // если файл был выбран  сохраняем его  в поле avatar в объекте data
+    if (req.file) {
+      data.avatar = `/usersimg/${req.file.filename}`;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ message: "Нечего обновлять" });
+    }
+
+    // обновляем данные в бд
+    const update = await prisma.user.update({
+      where: { id: userId },
+      data,
+      select: { id: true, username: true, avatar: true },
+    });
+
+    // отправляем на фронт новые данные
+    return res.json({
+      userId: update.id,
+      username: update.username,
+      avatar: update.avatar,
+    });
+  },
+);
+
 export default router;

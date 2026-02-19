@@ -85,8 +85,9 @@ export default function ChatCards() {
   const { currentRoom } = useAppSelector((store) => store.room);
 
   // Забираем из store данные user
-  const { userId } = useAppSelector((store) => store.user);
-
+  const { userId, avatar } = useAppSelector((store) => store.user);
+  const user = useAppSelector((store) => store.user);
+  console.log("user", user);
   // ------------------- Posts ----------------------
   // режим фокуса на одном посте. когда жмёшь «Комментарии» у поста,
   // на странице остаётся только этот пост + его комментарии, а остальные посты скрываются.
@@ -185,16 +186,41 @@ export default function ChatCards() {
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Avatar
-                sx={{
-                  width: 56,
-                  height: 56,
-                  background: "rgba(183,148,244,0.1)",
-                  border: `2px solid rgba(183,148,244,0.3)`,
-                }}
-              >
-                {currentRoom?.isPrivate ? "🔒" : "🌐"}
-              </Avatar>
+              {avatar ? (
+                <Box
+                  sx={{
+                    borderRadius: "999px",
+                    padding: "2px",
+                    background:
+                      "linear-gradient(135deg, #b794f4 0%, #7c3aed 50%, #4c1d95 100%)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    className="avatar"
+                    src={`${import.meta.env.VITE_API_URL}${avatar}`}
+                    alt="avatar"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      display: "block",
+                    }}
+                  />
+                </Box>
+              ) : (
+                <Avatar
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    background: "rgba(183,148,244,0.1)",
+                    border: `2px solid rgba(183,148,244,0.3)`,
+                  }}
+                />
+              )}
+
               <Box>
                 <Typography
                   variant="h6"

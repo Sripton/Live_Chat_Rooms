@@ -106,8 +106,6 @@ export default function CommentNode({
   // мои реакции
   const myReaction = reactions?.myReaction ?? null;
 
-  console.log("reactions", reactions);
-
   return (
     <Box
       sx={{

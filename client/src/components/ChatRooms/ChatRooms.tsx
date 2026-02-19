@@ -68,8 +68,6 @@ export default function ChatRooms() {
   const { userId } = useAppSelector((store) => store.user);
   // функция для обработки создания комнаты
 
-  console.log("typeof userId", typeof userId); // string
-
   const handleCreateRoomClick = () => {
     // если пользователь ни зарегистрирован
     if (!userId) {
@@ -233,7 +231,7 @@ export default function ChatRooms() {
   }, [privateRooms, getPrivateState]);
 
   const handlePrivateRoomClick = (room: any) => {
-    // если пользователя нет отправляем регистрироваься 
+    // если пользователя нет отправляем регистрироваься
     if (!userId) {
       navigate("/signin");
       return;
@@ -248,13 +246,13 @@ export default function ChatRooms() {
       return;
     }
 
-    // если запрос был отправлен и статус запроса  ожидает ответа 
+    // если запрос был отправлен и статус запроса  ожидает ответа
     if (state === "PENDING") {
       showRequestError("Запрос уже отправлен", "info");
       return;
     }
 
-    // если запрос быд отклонен 
+    // если запрос быд отклонен
     if (state === "REJECTED") {
       showRequestError("Доступ отклонён", "error");
       return;
@@ -666,12 +664,12 @@ export default function ChatRooms() {
                           state === "OWNER"
                             ? "Вы владелец"
                             : state === "ACCESS"
-                            ? "Доступ разрешён"
-                            : state === "PENDING"
-                            ? "Запрос отправлен"
-                            : state === "REJECTED"
-                            ? "Доступ отклонён"
-                            : "Требуется доступ";
+                              ? "Доступ разрешён"
+                              : state === "PENDING"
+                                ? "Запрос отправлен"
+                                : state === "REJECTED"
+                                  ? "Доступ отклонён"
+                                  : "Требуется доступ";
                         return (
                           <Grow in={true} timeout={index * 100} key={room.id}>
                             <Box
@@ -1059,7 +1057,7 @@ export default function ChatRooms() {
                               if (room.myRequestStatus === "PENDING") {
                                 showRequestError(
                                   "Запрос уже отправлен",
-                                  "info"
+                                  "info",
                                 );
                                 return;
                               }

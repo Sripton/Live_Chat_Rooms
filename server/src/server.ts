@@ -2,12 +2,13 @@ import "dotenv/config";
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import path from "path";
 import session from "express-session"; // Подключаем express-session для управления сессиями
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
 import userAPIRouter from "./API/users/userAPIRouter";
 import passport from "passport";
-import "./auth/passportGoogle";
+import "./authGoogle/passportGoogle";
 import authAPIRouter from "./API/users/authAPIRouter";
 import roomAPIRouter from "./API/rooms/roomAPIRouter";
 import roomRequestAPIRouter from "./API/roomRequest/roomRequestAPIRouter";
@@ -22,6 +23,7 @@ const PORT = process.env.PORT;
 app.use(morgan("dev")); // Включаем логирование HTTP-запросов в режиме "dev"
 app.use(express.json()); // Подключаем встроенный middleware для обработки JSON-запросов
 app.use(express.urlencoded({ extended: true })); // Подключаем middleware для обработки данных формы
+app.use(express.static(path.join(process.cwd(), "public")));
 app.use(
   cors({
     // origin: "http://localhost:5173",

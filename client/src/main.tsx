@@ -7,6 +7,7 @@ import Signup from "./components/Signup/Signup.tsx";
 import Signin from "./components/Signin/Signin.tsx";
 import UserDashBoard from "./components/UserDashBoard/UserDashBoard.tsx";
 import ChatCards from "./components/ChatCards/ChatCards.tsx";
+import ProfileEditor from "./components/ProfileEditor/ProfileEditor.tsx";
 import { Provider } from "react-redux";
 import { store } from "./redux/store/store.ts";
 import axios from "axios";
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       { path: "signin", element: <Signin /> },
       { path: "chatcards/:id", element: <ChatCards /> },
       { path: "profile", element: <UserDashBoard /> },
+      { path: "profileeditor", element: <ProfileEditor /> },
     ],
   },
 ]);
@@ -30,5 +32,5 @@ createRoot(document.getElementById("root")!).render(
     <Provider store={store}>
       <RouterProvider router={router}></RouterProvider>
     </Provider>
-  </StrictMode>
+  </StrictMode>,
 );

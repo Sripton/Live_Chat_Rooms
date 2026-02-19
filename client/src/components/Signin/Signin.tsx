@@ -29,6 +29,7 @@ type AuthInputs = {
 // начальное состояние
 const INITIAL_INPUTS: AuthInputs = { login: "", password: "" };
 export default function Signin() {
+  // состояние для данных пользователя
   const [inputs, setInputs] = useState<AuthInputs>(INITIAL_INPUTS);
 
   const dispatch = useAppDispatch();

@@ -12,7 +12,6 @@ import {
   ListItemButton,
   ListItemText,
   ListItemIcon,
-  Divider,
   InputBase,
   Paper,
   Tabs,

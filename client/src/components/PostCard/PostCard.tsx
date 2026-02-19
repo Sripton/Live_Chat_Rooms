@@ -148,7 +148,6 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
     const { myReactionByPostId } = useAppSelector(
       (store) => store.postReaction,
     );
-    console.log("myReactionByPostId", myReactionByPostId[post.id]);
 
     // Анимация появления элементов
     const styleAnimation = (index: number) => ({

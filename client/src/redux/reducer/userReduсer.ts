@@ -10,16 +10,16 @@ import type { UserActions } from "../types/userTypes";
 
 export type UserState = {
   userId: string | null;
-  userName: string | null;
-  userAvatar: string | null;
+  username: string | null;
+  avatar: string | null;
   isAuthenticated: boolean;
   error: string | null;
 };
 
 const initialState: UserState = {
   userId: null,
-  userName: null,
-  userAvatar: null,
+  username: null,
+  avatar: null,
   isAuthenticated: false,
   error: null,
 };
@@ -30,7 +30,7 @@ const initialState: UserState = {
 // И всегда возвращает UserState
 export default function userReduсer(
   state: UserState = initialState,
-  action: UserActions
+  action: UserActions,
 ): UserState {
   switch (action.type) {
     // Регистарция и аутентификация пользовтеля
@@ -39,8 +39,8 @@ export default function userReduсer(
       return {
         ...state,
         userId: action.payload.userId,
-        userName: action.payload.userName,
-        userAvatar: action.payload.userAvatar,
+        username: action.payload.username,
+        avatar: action.payload.avatar,
         isAuthenticated: true,
         error: null,
       };
@@ -51,6 +51,14 @@ export default function userReduсer(
     case SET_REGISTER_ERROR:
       return { ...state, error: action.payload.error };
 
+    case SET_EDIT_USER: {
+      const { username, avatar } = action.payload;
+      return {
+        ...state,
+        username: username ?? state.username, // если не было изменений, возвращаем старый
+        avatar: avatar ?? state.avatar, // если не было изменений, возвращаем старый
+      };
+    }
     default:
       return state;
   }

@@ -1,4 +1,4 @@
-import React, { use, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Avatar,
   Box,
@@ -24,7 +24,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 // Иконки
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
@@ -74,7 +74,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`} // Связь панели с соответствующей вкладкой
       {...other} // распаковка оставшихся пропсов
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && children}
     </div>
   );
 }
@@ -87,7 +87,6 @@ const commonPanelBoxSx = {
   maxHeight: "65vh",
   overflowY: "hidden",
   pr: 1,
-  boxShadow: "0 14px 30px rgba(0,0,0,0.85)",
 };
 
 // Спинер действия (approve/reject)
@@ -137,6 +136,7 @@ function ActionSpinner({ intent }) {
 
 export default function UserDashBoard() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const theme = useTheme();
 
   // Breakpoints (похоже на ChatRooms)
@@ -154,15 +154,13 @@ export default function UserDashBoard() {
     setTabIndex(newValue);
   };
 
-  // ------------- При меньших размераз экрана ----------------
+  // ------------- При меньших размерах экрана ----------------
   //  ЭКРАНЫ МЕНЬШЕ lg (1200px)
   const isSmall = useMediaQuery(theme.breakpoints.down("lg"));
 
   // ------------------ Данные из user store ------------------
   // Забираем данные  User из store
-  const { userId, userAvatar, userName } = useAppSelector(
-    (store) => store.user,
-  );
+  const { userId, avatar, username } = useAppSelector((store) => store.user);
 
   //  забираем все комнаты пользователя
   useEffect(() => {
@@ -187,7 +185,7 @@ export default function UserDashBoard() {
     }
   }, [userId, dispatch]); // зависимости
 
-  // объеденям все запросы
+  // объеденяем все запросы
   const allRequests = useMemo(() => {
     return [
       ...incoming.map((r) => ({ ...r, kind: "incoming" as const })),
@@ -204,40 +202,14 @@ export default function UserDashBoard() {
     },
   });
   const GlassCardSx = {
-    background: "rgba(35, 20, 51, 0.4)",
-    backdropFilter: "blur(16px) saturate(180%)",
-    WebkitBackdropFilter: "blur(16px) saturate(180%)",
-    borderRadius: "24px",
-    border: "1px solid rgba(183, 148, 244, 0.12)",
-    boxShadow: `
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2)
-  `,
-    overflow: "hidden",
-    position: "relative",
-    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-    "&::before": {
-      content: '""',
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      height: "1px",
-      background:
-        "linear-gradient(90deg, transparent, rgba(183,148,244,0.4), transparent)",
-      zIndex: 1,
-    },
+    background: "rgba(35, 20, 51, 0.7)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "16px",
+    border: "1px solid rgba(183, 148, 244, 0.1)",
+    transition: "all 0.3s ease",
     "&:hover": {
       borderColor: "rgba(183, 148, 244, 0.3)",
-      transform: isDesktop
-        ? "translateY(-6px) scale(1.01)"
-        : "translateY(-2px)",
-      boxShadow: `
-      0 20px 40px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(183, 148, 244, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15)
-    `,
+      boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
     },
   } as const;
 
@@ -250,82 +222,56 @@ export default function UserDashBoard() {
     WebkitTextFillColor: "transparent",
   } as const;
 
-  // Новый стиль для статусных индикаторов
-  const StatusPulseSx = {
-    position: "relative",
-    "&::after": {
-      content: '""',
-      position: "absolute",
-      top: -2,
-      left: -2,
-      right: -2,
-      bottom: -2,
-      borderRadius: "inherit",
-      background: "linear-gradient(45deg, #b794f4, #8b5cf6, #7c3aed, #b794f4)",
-      backgroundSize: "400% 400%",
-      animation: "gradientPulse 3s ease infinite",
-      zIndex: -1,
-      opacity: 0.6,
+  const tabsMeta = [
+    {
+      id: "dash-tab-0",
+      controls: "dash-tabpanel-0",
+      icon: <MeetingRoomIcon />,
+      label: "Мои комнаты",
+      value: userRooms?.length ?? 0,
     },
-    "@keyframes gradientPulse": {
-      "0%, 100%": { backgroundPosition: "0% 50%" },
-      "50%": { backgroundPosition: "100% 50%" },
+    {
+      id: "dash-tab-1",
+      controls: "dash-tabpanel-1",
+      icon: <MailOutlineIcon />,
+      label: "Запросы",
+      value: allRequests.length,
     },
+    {
+      id: "dash-tab-2",
+      controls: "dash-tabpanel-2",
+      icon: <ForumOutlinedIcon />,
+      label: "Ответы",
+      value: 0,
+    },
+  ];
+
+  // ------------- Переход к редактированию профиля --------------
+  const goToProfileEditor = () => {
+    navigate(`/profileeditor`);
   };
-
-  // ------------- Паралакс эффект --------------
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const { clientX, clientY } = e;
-      const x = (clientX / window.innerWidth - 0.5) * 20;
-      const y = (clientY / window.innerHeight - 0.5) * 20;
-      setMousePosition({ x, y });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
+        height: { xs: "auto", md: "100vh" },
+        overflowY: { xs: "auto", sm: "auto", md: "auto" },
+        overflowX: "hidden",
         bgcolor: COLORS.mainColor,
         color: "#e5e7eb",
-        backgroundImage: `
-      radial-gradient(
-        1200px 800px at 
-        calc(50% + ${mousePosition.x}px) 
-        calc(20% + ${mousePosition.y}px), 
-        rgba(139, 92, 246, 0.15) 0%, 
-        transparent 50%
-      ),
-      radial-gradient(
-        1000px 600px at 
-        calc(80% - ${mousePosition.x}px) 
-        calc(80% - ${mousePosition.y}px), 
-        rgba(124, 58, 237, 0.1) 0%, 
-        transparent 45%
-      ),
-      linear-gradient(135deg, #0b0615 0%, #1d102f 45%, #0f172a 100%)
-    `,
-        backgroundAttachment: "fixed",
-        transition: "background-position 0.3s ease-out",
-        overflowX: "hidden",
+        position: "relative",
       }}
     >
       <Grid
         container
-        // spacing={isMobile ? 2 : 3}
         sx={{
-          maxWidth: 1300 /* Максимальная ширина контента */,
+          maxWidth: 800 /* Максимальная ширина контента */,
           mx: "auto" /* Автоматические отступы по горизонтали (центрирование) */,
           px: {
             xs: 2,
             sm: 2.5,
             md: 3,
-            lg: 3.5,
           } /* Горизонтальные отступы (padding-left/right) */,
           py: {
             xs: 2,
@@ -334,21 +280,14 @@ export default function UserDashBoard() {
           } /* Вертикальные отступы (padding-top/bottom) */,
         }}
       >
-        {/* LEFT: Profile / Tabs */}
-        <Grid
-          item
-          xs={12} /* На очень маленьких экранах */
-          md={4} /* На средних экранах (medium) */
-          lg={3} /* На больших экранах (large) */
-        >
-          <Stack
-          // spacing={isMobile ? 2 : 3}
-          >
+        {/* Profile / Tabs / Content - все в одной колонке */}
+        <Grid item xs={12}>
+          <Stack spacing={2}>
             {/* Profile card */}
             <Paper elevation={0} sx={GlassCardSx}>
               <Box
                 sx={{
-                  p: isMobile ? 2 : 2.5,
+                  p: 2,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -371,162 +310,91 @@ export default function UserDashBoard() {
                     </Typography>
                   </Box>
                 </Stack>
-                {!isMobile && (
-                  <Button
-                    variant="contained"
-                    sx={{
-                      borderRadius: "14px",
-                      textTransform: "none",
-                      px: 2,
-                      py: 0.9,
-                      position: "relative", // ← добавить
-                      overflow: "hidden", // ← добавить
-                      "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        top: -2,
-                        left: -2,
-                        right: -2,
-                        bottom: -2,
-                        borderRadius: "14px",
-                        background:
-                          "linear-gradient(45deg, #b794f4, #8b5cf6, #7c3aed, #b794f4)",
-                        backgroundSize: "400% 400%",
-                        animation: "gradientPulse 3s ease infinite",
-                        zIndex: 0,
-                      },
-                      "& .MuiButton-label": {
-                        position: "relative",
-                        zIndex: 1,
-                      },
-
-                      background:
-                        "linear-gradient(135deg, #b794f4 0%, #8b5cf6 100%)",
-
-                      fontFamily: "'Inter', sans-serif",
-                      fontWeight: 700,
-                      "&:hover": {
-                        background:
-                          "linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)",
-                        transform: "translateY(-1px)",
-                        boxShadow: "0 8px 25px rgba(139, 92, 246, 0.35)",
-                      },
-                      transition: "all 0.25s ease",
-                    }}
-                  >
-                    <Typography sx={{ zIndex: 2, color: "#1f2933" }}>
-                      Редактировать
-                    </Typography>
-                  </Button>
-                )}
               </Box>
 
-              <Box sx={{ p: isMobile ? 2 : 2.5 }}>
+              <Box sx={{ p: 2 }}>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  {userAvatar ? (
-                    <Box
+                  {avatar ? (
+                    <Avatar
                       sx={{
                         width: 64,
                         height: 64,
-                        borderRadius: "50%",
-                        p: 0.5,
-                        // ДОБАВЬТЕ ЭТО:
-                        position: "relative",
-                        "&::after": {
-                          content: '""',
-                          position: "absolute",
-                          top: -2,
-                          left: -2,
-                          right: -2,
-                          bottom: -2,
-                          borderRadius: "50%",
-                          background:
-                            "linear-gradient(45deg, #b794f4, #8b5cf6, #7c3aed, #b794f4)",
-                          backgroundSize: "400% 400%",
-                          animation: "gradientPulse 3s ease infinite",
-                          zIndex: -1,
-                          opacity: 0.6,
-                        },
-                        // Стили внутри остаются:
-                        background:
-                          "linear-gradient(135deg, #b794f4 0%, #7c3aed 50%, #4c1d95 100%)",
-                        flexShrink: 0,
+                        background: "rgba(183,148,244,0.1)",
+                        border: "2px solid rgba(183,148,244,0.3)",
                       }}
-                    >
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}${userAvatar}`}
-                        alt="user"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          display: "block",
-                        }}
-                      />
-                    </Box>
+                      src={`${import.meta.env.VITE_API_URL}${avatar}`}
+                      alt="user"
+                    />
                   ) : (
                     <Avatar
                       sx={{
                         width: 64,
                         height: 64,
-                        bgcolor: "rgba(183,148,244,0.15)",
+                        background: "rgba(183,148,244,0.1)",
+                        border: "2px solid rgba(183,148,244,0.3)",
                         color: "#e5e7eb",
-                        border: "1px solid rgba(183,148,244,0.25)",
                       }}
                     >
                       <AccountCircleIcon sx={{ fontSize: 38 }} />
                     </Avatar>
                   )}
 
-                  <Box sx={{ minWidth: 0 }}>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
                     <Typography
                       sx={{
-                        ...SectionTitleSx,
-                        fontSize: isMobile ? "1.05rem" : "1.1rem",
+                        fontWeight: 600,
+                        fontFamily:
+                          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                        background: "linear-gradient(45deg, #e5e7eb, #b794f4)",
+                        backgroundClip: "text",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        fontSize: "1.05rem",
                         mb: 0.25,
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                       }}
                     >
-                      {userName}
+                      {username}
                     </Typography>
                   </Box>
                 </Stack>
               </Box>
 
-              {isMobile && (
-                <Box sx={{ px: 2, pb: 2 }}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    sx={{
-                      borderRadius: "14px",
-                      textTransform: "none",
-                      py: 1.1,
+              <Box sx={{ px: 2, pb: 2 }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={goToProfileEditor}
+                  sx={{
+                    borderRadius: "14px",
+                    textTransform: "none",
+                    py: 1.1,
+                    background:
+                      "linear-gradient(135deg, #b794f4 0%, #8b5cf6 100%)",
+                    color: "#1f2933",
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    transition: "all 0.3s ease",
+                    "&:hover": {
                       background:
-                        "linear-gradient(135deg, #b794f4 0%, #8b5cf6 100%)",
-                      color: "#1f2933",
-                      fontFamily: "'Inter', sans-serif",
-                      fontWeight: 700,
-                      "&:hover": {
-                        background:
-                          "linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)",
-                      },
-                    }}
-                  >
-                    Редактировать профиль
-                  </Button>
-                </Box>
-              )}
+                        "linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 8px 25px rgba(139, 92, 246, 0.4)",
+                    },
+                  }}
+                >
+                  Редактировать
+                </Button>
+              </Box>
             </Paper>
 
             {/* Tabs card */}
             <Paper elevation={0} sx={GlassCardSx}>
               <Box
                 sx={{
-                  p: isMobile ? 2 : 2.5,
+                  p: 2,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -543,66 +411,94 @@ export default function UserDashBoard() {
                 </Stack>
               </Box>
 
-              <Box sx={{ p: isMobile ? 1.25 : 1.5 }}>
+              <Box sx={{ p: 1.5 }}>
                 <Tabs
                   value={tabIndex}
                   onChange={handleChangeTabs}
                   variant="fullWidth"
                   sx={{
-                    minHeight: 42,
+                    minHeight: 48,
                     "& .MuiTabs-indicator": {
-                      height: 3,
+                      height: 2,
                       backgroundColor: COLORS.accentColor,
-                      borderRadius: 2,
+                      borderRadius: 1,
                     },
                     "& .MuiTab-root": {
                       textTransform: "none",
                       fontFamily: "'Inter', sans-serif",
                       fontWeight: 600,
                       color: COLORS.textMuted,
-                      minHeight: 42,
-                      borderRadius: "12px",
+                      minHeight: 48,
+                      fontSize: "0.875rem",
+                      justifyContent: "flex-start",
+                      px: 1.5,
                     },
                     "& .Mui-selected": {
                       color: COLORS.accentColor,
                     },
                   }}
                 >
-                  <Tab
-                    id="dash-tab-0"
-                    aria-controls="dash-tabpanel-0"
-                    icon={<MeetingRoomIcon />}
-                    iconPosition="start"
-                    label="Мои комнаты"
-                  />
-                  <Tab
-                    id="dash-tab-1"
-                    aria-controls="dash-tabpanel-1"
-                    icon={<MailOutlineIcon />}
-                    iconPosition="start"
-                    label="Запросы"
-                  />
-                  <Tab
-                    id="dash-tab-2"
-                    aria-controls="dash-tabpanel-2"
-                    icon={<ForumOutlinedIcon />}
-                    iconPosition="start"
-                    label="Ответы"
-                  />
+                  {tabsMeta.map((tab) => (
+                    <Tab
+                      key={tab.id}
+                      id={tab.id}
+                      aria-controls={tab.controls}
+                      label={
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            width: "100%",
+                            gap: 1.5,
+                          }}
+                        >
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            alignItems="center"
+                            sx={{ minWidth: 0 }}
+                          >
+                            {tab.icon}
+                            <Typography
+                              sx={{
+                                fontWeight: 600,
+                                fontFamily: "'Inter', sans-serif",
+                                fontSize: "0.875rem",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {tab.label}
+                            </Typography>
+                          </Stack>
+                          <Chip
+                            size="small"
+                            label={tab.value}
+                            sx={{
+                              height: 22,
+                              px: 0.75,
+                              bgcolor: "rgba(255,255,255,0.04)",
+                              color: COLORS.textMuted,
+                              border: "1px solid rgba(255,255,255,0.08)",
+                              fontWeight: 700,
+                            }}
+                          />
+                        </Box>
+                      }
+                    />
+                  ))}
                 </Tabs>
               </Box>
             </Paper>
           </Stack>
-        </Grid>
 
-        {/* RIGHT: Content */}
-        <Grid item xs={12} md={8} lg={9}>
-          {/* Panels */}
-          <TabPanel value={tabIndex} index={0}>
+          {/* Content Panels */}
+          <Box>
+            <TabPanel value={tabIndex} index={0}>
             <Paper elevation={0} sx={GlassCardSx}>
               <Box
                 sx={{
-                  p: isMobile ? 2 : 2.5,
+                  p: 2,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -629,117 +525,122 @@ export default function UserDashBoard() {
                 </Typography>
               </Box>
 
-              <Box>
+              <Box sx={{ p: 2 }}>
                 {!userRooms || userRooms.length === 0 ? (
-                  <Typography>
+                  <Typography
+                    sx={{
+                      color: COLORS.textMuted,
+                      fontFamily: "'Inter', sans-serif",
+                      textAlign: "center",
+                      py: 4,
+                    }}
+                  >
                     Пока пусто. Вы ещё не состоите ни в одной комнате
                   </Typography>
                 ) : (
                   <Stack spacing={1.5}>
                     {userRooms.map((room: any, index: number) => (
-                      <Grow in={true} timeout={index * 90} key={room.id}>
-                        <Box
-                          component={NavLink}
-                          to={`/chatcards/${room.id}`}
-                          sx={{ textDecoration: "none" }}
+                      <Box
+                        component={NavLink}
+                        to={`/chatcards/${room.id}`}
+                        sx={{ textDecoration: "none" }}
+                        key={room.id}
+                      >
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 2,
+                            borderRadius: "12px",
+                            background: "rgba(255,255,255,0.02)",
+                            border: "1px solid rgba(255,255,255,0.05)",
+                            cursor: "pointer",
+                            transition: "all 0.3s ease",
+                            position: "relative",
+                            overflow: "hidden",
+                            "&::before": {
+                              content: '""',
+                              position: "absolute",
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              width: "3px",
+                              background: room.isPrivate
+                                ? "linear-gradient(180deg, #ef4444, transparent)"
+                                : "linear-gradient(180deg, #b794f4, transparent)",
+                              opacity: 0,
+                              transition: "opacity 0.3s ease",
+                            },
+                            "&:hover": {
+                              transform: "translateX(4px)",
+                              background: "rgba(183,148,244,0.08)",
+                              borderColor: "rgba(183,148,244,0.3)",
+                              boxShadow: "0 4px 20px rgba(183,148,244,0.15)",
+                              "&::before": { opacity: 1 },
+                            },
+                          }}
                         >
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 2,
-                              borderRadius: "12px",
-                              background: "rgba(255,255,255,0.02)",
-                              border: "1px solid rgba(255,255,255,0.05)",
-                              cursor: "pointer",
-                              transition:
-                                "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                              position: "relative",
-                              overflow: "hidden",
-                              "&::before": {
-                                content: '""',
-                                position: "absolute",
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: "3px",
-                                background: room.isPrivate
-                                  ? "linear-gradient(180deg, #ef4444, transparent)"
-                                  : "linear-gradient(180deg, #b794f4, transparent)",
-                                opacity: 0,
-                                transition: "opacity 0.3s ease",
-                              },
-                              "&:hover": {
-                                transform: "translateX(6px)",
-                                background: "rgba(183,148,244,0.08)",
-                                borderColor: "rgba(183,148,244,0.3)",
-                                boxShadow: "0 4px 20px rgba(183,148,244,0.15)",
-                                "&::before": { opacity: 1 },
-                              },
-                              ...styleAnimation(index),
-                            }}
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1.5}
                           >
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              spacing={1.5}
+                            <Box
+                              sx={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: "10px",
+                                background: "rgba(183,148,244,0.1)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
                             >
-                              <Box
-                                sx={{
-                                  width: 36,
-                                  height: 36,
-                                  borderRadius: "12px",
-                                  background: "rgba(183,148,244,0.1)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {room.isPrivate ? "🔒" : "🌐"}
-                              </Box>
+                              {room.isPrivate ? "🔒" : "🌐"}
+                            </Box>
 
-                              <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Typography
-                                  sx={{
-                                    fontWeight: 600,
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Typography
+                              sx={{
+                                    fontWeight: 500,
                                     fontFamily: "'Inter', sans-serif",
-                                    fontSize: isMobile ? "0.95rem" : "1rem",
+                                    fontSize: "0.875rem",
                                     color: "#e5e7eb",
                                     whiteSpace: "nowrap",
                                     overflow: "hidden",
                                     textOverflow: "ellipsis",
                                   }}
-                                >
-                                  {room.nameRoom}
-                                </Typography>
-                                <Typography
-                                  sx={{
-                                    fontSize: "0.8rem",
-                                    color: COLORS.textMuted,
-                                    mt: 0.25,
-                                  }}
-                                >
-                                  {room.isPrivate
-                                    ? "Приватная • доступ по запросу"
-                                    : "Открытая • доступна всем"}
-                                </Typography>
-                              </Box>
-                            </Stack>
-                          </Paper>
-                        </Box>
-                      </Grow>
+                              >
+                                {room.nameRoom}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  color: COLORS.textMuted,
+                                  mt: 0.25,
+                                  fontFamily: "'Inter', sans-serif",
+                                }}
+                              >
+                                {room.isPrivate
+                                  ? "Приватная • доступ по запросу"
+                                  : "Открытая • доступна всем"}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Paper>
+                      </Box>
                     ))}
                   </Stack>
                 )}
               </Box>
             </Paper>
-          </TabPanel>
+            </TabPanel>
 
-          <TabPanel value={tabIndex} index={1}>
-            <Paper elevation={0} sx={GlassCardSx}>
+            <TabPanel value={tabIndex} index={1}>
+              <Paper elevation={0} sx={GlassCardSx}>
               <Box
                 sx={{
-                  p: isMobile ? 2 : 2.5,
+                  p: 2,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -766,17 +667,18 @@ export default function UserDashBoard() {
                 </Stack>
               </Box>
 
-              <Box>
+              <Box sx={{ p: 2 }}>
                 {error && (
                   <Paper
                     elevation={0}
                     sx={{
                       p: 1.5,
                       mb: 2,
-                      borderRadius: "14px",
-                      background: "rgba(239,68,68,0.08)",
-                      border: "1px solid rgba(239,68,68,0.25)",
+                      borderRadius: "12px",
+                      background: "rgba(239,68,68,0.1)",
+                      border: "1px solid rgba(239,68,68,0.3)",
                       color: "#fca5a5",
+                      fontFamily: "'Inter', sans-serif",
                     }}
                   >
                     {error}
@@ -784,7 +686,14 @@ export default function UserDashBoard() {
                 )}
 
                 {allRequests.length === 0 ? (
-                  <Typography>
+                  <Typography
+                    sx={{
+                      color: COLORS.textMuted,
+                      fontFamily: "'Inter', sans-serif",
+                      textAlign: "center",
+                      py: 4,
+                    }}
+                  >
                     Нет запросов. Здесь появятся входящие и исходящие запросы
                   </Typography>
                 ) : (
@@ -847,16 +756,15 @@ export default function UserDashBoard() {
                               )
                             }
                           >
-                            <Paper
+                              <Paper
                               elevation={0}
                               sx={{
                                 width: "100%",
                                 p: 2,
-                                borderRadius: "16px",
+                                borderRadius: "12px",
                                 background: "rgba(255,255,255,0.02)",
                                 border: "1px solid rgba(255,255,255,0.05)",
-                                transition:
-                                  "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                                transition: "all 0.3s ease",
                                 position: "relative",
                                 overflow: "hidden",
                                 "&::before": {
@@ -872,17 +780,14 @@ export default function UserDashBoard() {
                                       : request.status === "REJECTED"
                                         ? "linear-gradient(180deg, #ef4444, transparent)"
                                         : "linear-gradient(180deg, #eab308, transparent)",
-                                  opacity: 0.9,
+                                  opacity: 0.7,
                                 },
                                 "&:hover": {
-                                  transform: isDesktop
-                                    ? "translateX(6px)"
-                                    : "none",
-                                  background: "rgba(183,148,244,0.06)",
-                                  borderColor: "rgba(183,148,244,0.25)",
-                                  boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+                                  transform: "translateX(4px)",
+                                  background: "rgba(183,148,244,0.08)",
+                                  borderColor: "rgba(183,148,244,0.3)",
+                                  boxShadow: "0 4px 20px rgba(183,148,244,0.15)",
                                 },
-                                ...styleAnimation(index),
                               }}
                             >
                               <ListItemButton
@@ -1042,36 +947,44 @@ export default function UserDashBoard() {
                 )}
               </Box>
             </Paper>
-          </TabPanel>
+            </TabPanel>
 
-          <TabPanel value={tabIndex} index={2}>
-            <Paper elevation={0} sx={GlassCardSx}>
-              <Box
-                sx={{
-                  p: isMobile ? 2 : 2.5,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  borderBottom: "1px solid rgba(255,255,255,0.05)",
-                }}
-              >
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <IconButton>💬</IconButton>
-                  <Typography sx={{ fontWeight: 700 }}>
-                    Ответы к комментариям
+            <TabPanel value={tabIndex} index={2}>
+              <Paper elevation={0} sx={GlassCardSx}>
+                <Box
+                  sx={{
+                    p: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <IconButton>💬</IconButton>
+                    <Typography sx={{ fontWeight: 700 }}>
+                      Ответы к комментариям
+                    </Typography>
+                  </Stack>
+                </Box>
+
+                <Box sx={{ p: 2 }}>
+                  <Typography
+                    sx={{
+                      color: COLORS.textMuted,
+                      fontFamily: "'Inter', sans-serif",
+                      textAlign: "center",
+                      py: 4,
+                    }}
+                  >
+                    Скоро будет. Здесь появятся ответы на ваши комментарии и посты
                   </Typography>
-                </Stack>
-              </Box>
-
-              <Box sx={{ p: isMobile ? 2 : 2.5 }}>
-                <Typography>
-                  Скоро будет. Здесь появятся ответы на ваши комментарии и посты
-                </Typography>
-              </Box>
-            </Paper>
-          </TabPanel>
+                </Box>
+              </Paper>
+            </TabPanel>
+          </Box>
+          </Grid>
         </Grid>
-      </Grid>
     </Box>
   );
 }

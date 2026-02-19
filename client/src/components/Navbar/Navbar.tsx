@@ -35,7 +35,7 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
 
   // Забираем данные пользователя из store
-  const { userName, userId } = useAppSelector((store) => store.user);
+  const { username, userId, avatar } = useAppSelector((store) => store.user);
 
   // логика для отображения меню
   const menuItems: string[] = !userId
@@ -81,6 +81,8 @@ export default function Navbar() {
         return;
     }
   };
+
+  console.log("avatar", avatar);
 
   return (
     <>
@@ -136,9 +138,54 @@ export default function Navbar() {
                 textAlign: "right",
               }}
             >
-              {userName}
+              {username}
             </Typography>
-            <Avatar />
+            <Avatar
+              sx={{
+                minWidth: "auto",
+                p: 0,
+                borderRadius: "999px",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
+              {avatar ? (
+                <Box
+                  sx={{
+                    borderRadius: "999px",
+                    padding: "2px",
+                    background:
+                      "linear-gradient(135deg, #b794f4 0%, #7c3aed 50%, #4c1d95 100%)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    className="avatar"
+                    src={`${import.meta.env.VITE_API_URL}${avatar}`}
+                    alt="avatar"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      display: "block",
+                    }}
+                  />
+                </Box>
+              ) : (
+                <Avatar
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    backgroundColor: COLORS.mainLight,
+                    color: "#fff",
+                    fontSize: "0.9rem",
+                  }}
+                />
+              )}
+            </Avatar>
           </Box>
         </Box>
         {/* Боковая панель меню */}

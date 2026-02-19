@@ -29,6 +29,7 @@ type RegisterInputs = {
   username?: string;
   avatar?: string | null;
 };
+
 // Регистрация нового пользователя
 export const registersUser =
   (inputs: RegisterInputs) =>
@@ -38,7 +39,7 @@ export const registersUser =
       // POST-запрос с данными формы (login, password, username)
       const { data } = await axios.post<UserPayload>(
         `/api/users/signup`,
-        inputs
+        inputs,
       );
       dispatch({
         type: SET_REGISTER_USER,
@@ -69,7 +70,7 @@ export const loginUser =
     try {
       const { data } = await axios.post<UserPayload>(
         `/api/users/signin`,
-        inputs
+        inputs,
       );
       dispatch({
         type: SET_AUTH_USER,
@@ -92,3 +93,14 @@ export const logoutUser = () => async (dispatch: AppDispatch) => {
     console.log(error);
   }
 };
+
+// экшен для редактрования профиля пользователя
+export const editUserProfile =
+  (formData: FormData) => async (dispatch: AppDispatch) => {
+    try {
+      const { data } = await axios.patch(`/api/users/uploadprofile`, formData);
+      dispatch({ type: SET_EDIT_USER, payload: data });
+    } catch (error) {
+      console.log(error);
+    }
+  };

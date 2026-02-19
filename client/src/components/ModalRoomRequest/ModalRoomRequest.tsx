@@ -4,7 +4,6 @@ import {
   Button,
   Typography,
   Snackbar,
-  Alert,
   Fade,
   Slide,
   Paper,
@@ -53,7 +52,7 @@ export default function ModalRoomRequest({
 }: ModalRommRequestProps) {
   // Забираем данные из store
   const { request, error, status } = useAppSelector(
-    (store) => store.roomRequest
+    (store) => store.roomRequest,
   );
   const dispatch = useAppDispatch();
 
@@ -87,8 +86,6 @@ export default function ModalRoomRequest({
       setOpenSnackbar((prev) => !prev);
     }
   }, [show]);
-  console.log("request", request);
-  console.log("error", error);
 
   return ReactDOM.createPortal(
     <Fade in={openRequestCreate} timeout={300}>
@@ -524,6 +521,6 @@ export default function ModalRoomRequest({
       </Box>
     </Fade>,
 
-    document.getElementById("modal-request") || document.body
+    document.getElementById("modal-request") || document.body,
   );
 }
