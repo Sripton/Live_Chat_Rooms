@@ -3,6 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import session from "express-session"; // Подключаем express-session для управления сессиями
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";

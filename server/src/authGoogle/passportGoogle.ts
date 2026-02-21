@@ -59,11 +59,8 @@ passport.use(
       } catch (error) {
         return done(null, error as Error);
       }
-    }
-  )
+    },
+  ),
 );
-
-console.log("GOOGLE_CALLBACK_URL =", process.env.GOOGLE_CALLBACK_URL);
-console.log("GOOGLE_CLIENT_ID =", process.env.GOOGLE_CLIENT_ID);
 
 export default passport;

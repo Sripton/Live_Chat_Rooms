@@ -18,12 +18,10 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
 
-  filename: (req, file, cb) => {
-    // Имя файла при сохранении (чтобы было уникально)
-    const safeOriginal = file.originalname
-      .replace(/\s+/g, "_")
-      .replace(/[^a-zA-Z0-9_.-]/g, "");
-    cb(null, `${Date.now()}-${safeOriginal}`);
+  filename: (req: any, file, cb) => {
+    const userId = req.session?.userId;
+    const extName = path.extname(file.originalname).toLowerCase() || ".png"; // гарантируем расширение для файла
+    cb(null, `user${userId}${extName}`); // перезаписыввем файл для данного пользовтаеля
   },
 });
 

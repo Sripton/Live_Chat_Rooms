@@ -2,6 +2,8 @@ import express from "express";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
 import upload from "../../MiddleWare/uploadUser";
+import path from "path";
+import fs from "fs";
 const router = express.Router();
 
 router.post("/signup", async (req: express.Request, res: express.Response) => {
@@ -195,6 +197,34 @@ router.patch(
   `/uploadprofile`,
   upload.single("avatar"),
   async (req: express.Request, res: express.Response) => {
+    // при редактировании профиля пользователем удаляем старые файлы
+    const removeOldAvatarFile = async (avatarPath: string | null) => {
+      try {
+        // если путь не найден ничего не удаляем
+        if (!avatarPath) return;
+
+        // Защита: удаляем только файлы внутри /usersimg/.
+        // Если по какой-то причине в БД лежит другой путь — игнорируем.
+        if (!avatarPath.startsWith("/usersimg")) return;
+
+        // Собираем абсолютный путь до файла, который лежит в ../public/usersimg
+        // avatarPath хранится с начальным слешем ("/usersimg/..."),
+        // поэтому добавляем точку перед ним, чтобы path.resolve корректно соединил.
+        const absolutePath = path.resolve(
+          // path.resolve() - Преобразует относительные пути в абсолютные. Склеивает части пути правильно для текущей ОС
+          __dirname,
+          "../public",
+          `.${avatarPath}`,
+        );
+
+        // Проверяем существование файла перед удалением
+        if (fs.existsSync(absolutePath)) {
+          await fs.unlink(absolutePath);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
     // забираем id пользователя из сессии
     const userId = req.session.userId;
 

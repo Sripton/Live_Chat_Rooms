@@ -147,28 +147,17 @@ export default function CommentNode({
       }}
     >
       {/* Отображение аватара пользователя */}
-      {!avatarUrl ? (
-        <Avatar
-          sx={{
-            width: 36,
-            height: 36,
-            background: "rgba(183,148,244,0.1)",
-            border: "1px solid rgba(183,148,244,0.2)",
-          }}
-        />
-      ) : (
-        <Avatar
-          // src={`${process.env.REACT_APP_BASEURL}${avatarUrl}`}
-          // alt={name}
-          sx={{
-            width: 36,
-            height: 36,
-            bgcolor: avatarUrl ? undefined : COLORS.accentColor,
-            border: `1px solid ${COLORS.accentLight}`,
-            color: COLORS.textPrimary,
-          }}
-        />
-      )}
+
+      <Avatar
+        src={`${import.meta.env.VITE_API_URL}${avatarUrl}`}
+        sx={{
+          width: 36,
+          height: 36,
+          bgcolor: avatarUrl ? undefined : COLORS.accentColor,
+          border: `1px solid ${COLORS.accentLight}`,
+          color: COLORS.textPrimary,
+        }}
+      />
 
       {/* Основной кард: комментарий и реакции  */}
       <Box

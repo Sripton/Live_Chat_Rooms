@@ -120,10 +120,13 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
     // для состояния разворачивания/сворачивания текста поста
     const isExpandedPost = expandedPost.has(post.id);
 
-    // данные из redux store
+    // данные из redux comment
     const { byPostId, countsByPostId } = useAppSelector(
       (store) => store.comment,
     );
+
+    // данные из redux user
+    const { avatar } = useAppSelector((store) => store.user);
 
     // Комментарии
     const comments = byPostId[post.id] ?? [];
@@ -231,14 +234,18 @@ const PostCard = React.forwardRef<HTMLDivElement, PostCardProps>(
               mb: 1.5,
             }}
           >
+            {/* Аватар владельца поста */}
             <Avatar
+              src={`${import.meta.env.VITE_API_URL}${post?.user?.avatar}`}
               sx={{
-                width: 40,
-                height: 40,
-                background: "rgba(183,148,244,0.1)",
-                border: "1px solid rgba(183,148,244,0.2)",
+                width: 36,
+                height: 36,
+                bgcolor: avatar ? undefined : COLORS.accentColor,
+                border: `1px solid ${COLORS.accentLight}`,
+                color: COLORS.textPrimary,
               }}
             />
+
             <Box sx={{ flex: 1 }}>
               <Typography
                 variant="subtitle2"
